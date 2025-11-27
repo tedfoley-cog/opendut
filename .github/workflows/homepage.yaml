@@ -22,6 +22,7 @@ env:
 
 jobs:
   homepage:
+    if: ${{ github.repository_owner == 'eclipse-opendut' }}
     uses: ./.github/workflows/job-homepage.yaml
     permissions:
       contents: read
