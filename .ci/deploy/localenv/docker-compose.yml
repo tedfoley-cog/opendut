@@ -463,6 +463,7 @@ services:
       - OPENDUT_CARL_NETWORK_REMOTE_PORT=443
       - OPENDUT_CARL_NETWORK_BIND_PORT=443
       - OPENDUT_CARL_NETWORK_TLS_CA=${OPENDUT_CERT_CA_PATH}
+      - OPENDUT_CARL_NETWORK_TLS_ENABLED=${OPENDUT_CARL_NETWORK_TLS_ENABLED:-true}
       - OPENDUT_CARL_NETWORK_TLS_KEY
       - OPENDUT_CARL_NETWORK_TLS_CERTIFICATE
       # CURL
@@ -507,7 +508,7 @@ services:
     labels:
       - traefik.enable=true
       - traefik.tcp.routers.carl.rule=HostSNI(`${OPENDUT_DOMAIN_CARL}`)
-      - traefik.tcp.routers.carl.tls.passthrough=true
+      - traefik.tcp.routers.carl.tls.passthrough=${OPENDUT_CARL_NETWORK_TLS_ENABLED:-true}
       - traefik.tcp.services.carl.loadbalancer.server.port=443
     networks:
       - opendut_local
