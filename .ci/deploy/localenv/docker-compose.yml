@@ -200,7 +200,7 @@ services:
       #test: ["CMD", "traefik", "healthcheck", "--ping"]
       test: ["CMD", "wget", "-q", "--proxy", "off", "--spider", "http://localhost:8081/ping"]
     volumes:
-      - ./data/traefik/config:/etc/traefik/dynamic
+      - ${OPENDUT_TRAEFIK_CONFIG_PATH:-./data/traefik/config}:/etc/traefik/dynamic
       - provision-secrets-data:/provision:ro
       - /var/run/docker.sock:/var/run/docker.sock
       - ${SHARED_CERTS_HOST_DIR}:${SHARED_CERTS_MOUNT_DIR}:ro
