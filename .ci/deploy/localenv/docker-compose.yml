@@ -461,11 +461,9 @@ services:
       # Network
       - OPENDUT_CARL_NETWORK_REMOTE_HOST=${OPENDUT_DOMAIN_CARL}
       - OPENDUT_CARL_NETWORK_REMOTE_PORT=443
-      - OPENDUT_CARL_NETWORK_BIND_PORT=443
+      - OPENDUT_CARL_NETWORK_BIND_PORT=80
       - OPENDUT_CARL_NETWORK_TLS_CA=${OPENDUT_CERT_CA_PATH}
-      - OPENDUT_CARL_NETWORK_TLS_ENABLED=${OPENDUT_CARL_NETWORK_TLS_ENABLED:-true}
-      - OPENDUT_CARL_NETWORK_TLS_KEY
-      - OPENDUT_CARL_NETWORK_TLS_CERTIFICATE
+      - OPENDUT_CARL_NETWORK_TLS_ENABLED=false
       # CURL
       - SSL_CERT_FILE=${OPENDUT_CERT_CA_PATH}
       # VPN
@@ -502,14 +500,12 @@ services:
     # https://docs.docker.com/reference/dockerfile/#healthcheck
     healthcheck:
       <<: *common-healthcheck-params
-      # --resolve expects HOST:PORT:ADDRESS (without scheme). Using localhost here for internal loopback.
-      # If you want to test the external domain with cert passthrough, replace localhost with ${OPENDUT_DOMAIN_CARL} and keep --insecure if cert mismatch.
-      test: [ "CMD-SHELL", "curl --fail --silent --resolve localhost:443:127.0.0.1 --output /dev/null --noproxy '*' --insecure https://localhost || exit 1" ]
+      test: [ "CMD-SHELL", "curl --fail --silent --output /dev/null --noproxy '*' http://localhost || exit 1" ]
     labels:
       - traefik.enable=true
-      - traefik.tcp.routers.carl.rule=HostSNI(`${OPENDUT_DOMAIN_CARL}`)
-      - traefik.tcp.routers.carl.tls.passthrough=${OPENDUT_CARL_NETWORK_TLS_ENABLED:-true}
-      - traefik.tcp.services.carl.loadbalancer.server.port=443
+      - traefik.http.routers.carl.rule=Host(`${OPENDUT_DOMAIN_CARL}`)
+      - traefik.http.routers.carl.tls=true
+      - traefik.http.services.carl.loadbalancer.server.port=80
     networks:
       - opendut_local
 
