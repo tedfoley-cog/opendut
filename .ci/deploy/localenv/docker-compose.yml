@@ -505,6 +505,7 @@ services:
       - traefik.enable=true
       - traefik.http.routers.carl.rule=Host(`${OPENDUT_DOMAIN_CARL}`)
       - traefik.http.routers.carl.tls=true
+      - traefik.http.services.carl.loadbalancer.server.scheme=h2c
       - traefik.http.services.carl.loadbalancer.server.port=80
     networks:
       - opendut_local
