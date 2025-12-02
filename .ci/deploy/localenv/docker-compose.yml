@@ -28,7 +28,7 @@ services:
       context: ../../..
       dockerfile: ./.ci/deploy/localenv/data/provision/Dockerfile
     environment:
-      - LEGO_CA_CERTIFICATES=${OPENDUT_CERT_CA_PATH}
+      - SSL_CERT_FILE=${OPENDUT_CERT_CA_PATH}
       - OPENDUT_DOMAIN_SUFFIX
       - OPENDUT_DOMAIN_CARL
       - OPENDUT_DOMAIN_AUTH
