@@ -1,0 +1,8 @@
+tls:
+  options:
+    default:
+      clientAuth:
+        caFiles:
+          - '{{ env "OPENDUT_CERT_CA_PATH" }}'
+        clientAuthType: '{{ env "OPENDUT_TRAEFIK_CLIENT_MTLS" }}'
+      ocsp:
