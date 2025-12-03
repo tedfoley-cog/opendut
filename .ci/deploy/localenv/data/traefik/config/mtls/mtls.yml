@@ -3,6 +3,6 @@ tls:
     default:
       clientAuth:
         caFiles:
-          - '{{ env "OPENDUT_CERT_CA_PATH" }}'
-        clientAuthType: '{{ env "OPENDUT_TRAEFIK_CLIENT_MTLS" }}'
+          - '{{ env "OPENDUT_TRAEFIK_CLIENT_AUTH_CA_PATH" }}'
+        clientAuthType: '{{ env "OPENDUT_TRAEFIK_CLIENT_AUTH_TYPE" }}'
       ocsp:

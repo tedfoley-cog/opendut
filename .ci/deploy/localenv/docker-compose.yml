@@ -187,8 +187,8 @@ services:
       - OPENDUT_OPENTELEMETRY_NETWORK_TLS_KEY
       - OPENDUT_CARL_NETWORK_TLS_CERTIFICATE
       - OPENDUT_CARL_NETWORK_TLS_KEY
-      - OPENDUT_TRAEFIK_CLIENT_MTLS
-      - OPENDUT_CERT_CA_PATH
+      - OPENDUT_TRAEFIK_CLIENT_AUTH_TYPE
+      - OPENDUT_TRAEFIK_CLIENT_AUTH_CA_PATH
     ports:
       - "8081:8081"            # /ping endpoint
       - "127.0.0.1:8080:8080"  # Traefik dashboard, only on localhost, do not expose publicly
@@ -257,6 +257,8 @@ services:
       - OPENDUT_NETBIRD_API_NETWORK_TLS_KEY
       - OPENDUT_NETBIRD_NETWORK_TLS_CERTIFICATE
       - OPENDUT_NETBIRD_NETWORK_TLS_KEY
+      - OPENDUT_NETBIRD_RELAY_NETWORK_TLS_CERTIFICATE
+      - OPENDUT_NETBIRD_RELAY_NETWORK_TLS_KEY
       - OPENDUT_NGINX_WEBDAV_NETWORK_TLS_CERTIFICATE
       - OPENDUT_NGINX_WEBDAV_NETWORK_TLS_KEY
       - OPENDUT_MONITORING_NETWORK_TLS_CERTIFICATE
@@ -265,6 +267,7 @@ services:
       - OPENDUT_OPENTELEMETRY_NETWORK_TLS_KEY
       - OPENDUT_CARL_NETWORK_TLS_CERTIFICATE
       - OPENDUT_CARL_NETWORK_TLS_KEY
+      - OPENDUT_TRAEFIK_CLIENT_AUTH_CA_PATH
     depends_on:
       provision-secrets:
         condition: service_completed_successfully
@@ -292,6 +295,7 @@ services:
           - ${OPENDUT_DOMAIN_SIGNAL}
           - ${OPENDUT_DOMAIN_OPENTELEMETRY}
           - ${OPENDUT_DOMAIN_CARL}
+          - ${OPENDUT_DOMAIN_NETBIRD_RELAY}
 
   
   # vaguely derived from: https://github.com/netbirdio/netbird/blob/main/infrastructure_files/docker-compose.yml.tmpl.traefik
