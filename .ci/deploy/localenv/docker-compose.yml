@@ -98,8 +98,7 @@ services:
     - KEYCLOAK_ADMIN_PASSWORD
     labels:
       - traefik.enable=true
-      - "traefik.http.routers.keycloak.rule=Host(`${OPENDUT_DOMAIN_AUTH}`)"
-      - "traefik.http.routers.keycloak.tls=true"
+      - traefik.http.routers.keycloak.rule=Host(`${OPENDUT_DOMAIN_AUTH}`)
       - logging=alloy
       - logging_job=keycloak
     networks:
@@ -153,6 +152,7 @@ services:
       - --providers.docker
       - --entrypoints.web.address=:80
       - --entrypoints.websecure.address=:443
+      - --entrypoints.websecure.http.tls=true
       - --entrypoints.ping.address=:8081
       - --ping.entryPoint=ping
       - --ping=true
@@ -232,6 +232,7 @@ services:
       - --providers.docker
       - --entrypoints.web.address=:80
       - --entrypoints.websecure.address=:443
+      - --entrypoints.websecure.http.tls=true
       - --entrypoints.ping.address=:8081
       - --ping.entryPoint=ping
       - --ping=true
@@ -322,7 +323,6 @@ services:
     labels:
       - traefik.enable=true
       - traefik.http.routers.netbird-dashboard.rule=Host(`${OPENDUT_DOMAIN_NETBIRD}`)
-      - traefik.http.routers.netbird-dashboard.tls=true
       - traefik.http.services.netbird-dashboard.loadbalancer.server.port=80
       - logging=alloy
       - logging_job=netbird-dashboard
@@ -442,12 +442,10 @@ services:
       # Netbird API REST endpoint
       - traefik.http.routers.netbird-api.rule=Host(`${OPENDUT_DOMAIN_NETBIRD_API}`) && PathPrefix(`/api`)
       - traefik.http.routers.netbird-api.service=netbird-api
-      - traefik.http.routers.netbird-api.tls=true
       - traefik.http.services.netbird-api.loadbalancer.server.port=80
       # Netbird API GRPC endpoint
       - traefik.http.routers.netbird-management.rule=Host(`${OPENDUT_DOMAIN_NETBIRD_API}`) && PathPrefix(`/management.ManagementService/`)
       - traefik.http.routers.netbird-management.service=netbird-management
-      - traefik.http.routers.netbird-management.tls=true
       - traefik.http.services.netbird-management.loadbalancer.server.port=80
       - traefik.http.services.netbird-management.loadbalancer.server.scheme=h2c
       # Logging
@@ -502,7 +500,6 @@ services:
     labels:
       - traefik.enable=true
       - traefik.http.routers.netbird-relay.rule=Host(`$OPENDUT_DOMAIN_NETBIRD_RELAY`) # && PathPrefix(`/relay`)
-      - traefik.http.routers.netbird-relay.tls=true
       - traefik.http.services.netbird-relay.loadbalancer.server.port=33080
     networks:
       - opendut_local
@@ -577,7 +574,6 @@ services:
     labels:
       - traefik.enable=true
       - traefik.http.routers.carl.rule=Host(`${OPENDUT_DOMAIN_CARL}`)
-      - traefik.http.routers.carl.tls=true
       - traefik.http.services.carl.loadbalancer.server.scheme=h2c
       - traefik.http.services.carl.loadbalancer.server.port=80
     networks:
@@ -632,7 +628,6 @@ services:
     labels:
       - traefik.enable=true
       - traefik.http.routers.nginx-webdav.rule=Host(`${OPENDUT_DOMAIN_NGINX_WEBDAV}`)
-      - traefik.http.routers.nginx-webdav.tls=true
       - traefik.http.services.nginx-webdav.loadbalancer.server.port=80
       - logging=alloy
       - logging_job=nginx-webdav
@@ -741,13 +736,11 @@ services:
       - traefik.enable=true
       # OpenTelemetry GRPC endpoint
       - traefik.http.routers.otel-collector-grpc.rule=Host(`${OPENDUT_DOMAIN_OPENTELEMETRY}`)
-      - traefik.http.routers.otel-collector-grpc.tls=true
       - traefik.http.routers.otel-collector-grpc.service=otel-collector-grpc
       - traefik.http.services.otel-collector-grpc.loadbalancer.server.port=4317
       - traefik.http.services.otel-collector-grpc.loadbalancer.server.scheme=h2c
       # Health check endpoint
       - traefik.http.routers.otel-collector-health.rule=Host(`${OPENDUT_DOMAIN_OPENTELEMETRY}`) && PathPrefix(`/health`)
-      - traefik.http.routers.otel-collector-health.tls=true
       - traefik.http.routers.otel-collector-health.service=otel-collector-health
       - traefik.http.services.otel-collector-health.loadbalancer.server.port=13133
     networks:
@@ -786,7 +779,6 @@ services:
     labels:
       - traefik.enable=true
       - traefik.http.routers.grafana.rule=Host(`${OPENDUT_DOMAIN_MONITORING}`)
-      - traefik.http.routers.grafana.tls=true
       - traefik.http.services.grafana.loadbalancer.server.port=80
     networks:
       - opendut_local
