@@ -53,7 +53,7 @@ done
 # Collect details about CARL
 # using opendut-cleo container of the localenv environment
 #################################################
-if docker ps -a --format '{{.Names}}' --filter "name=opendut-cleo" | grep -q "^opendut-cleo" || false; then
+if docker ps --format '{{.Names}}' --filter "name=opendut-cleo" | grep -q "^opendut-cleo" || false; then
   mkdir -p "$LOG_DIRECTORY"/cleo/
   CLEO_SUBCOMMANDS="cluster-descriptors cluster-deployments peers devices"
   for COMMAND in $CLEO_SUBCOMMANDS
