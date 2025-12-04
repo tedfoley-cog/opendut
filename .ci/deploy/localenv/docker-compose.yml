@@ -210,16 +210,7 @@ services:
       - logging=alloy
       - logging_job=traefik
     networks:
-      opendut_local:
-        aliases:
-          - ${OPENDUT_DOMAIN_SUFFIX}
-          - ${OPENDUT_DOMAIN_NETBIRD}
-          - ${OPENDUT_DOMAIN_NETBIRD_API}
-          - ${OPENDUT_DOMAIN_AUTH}
-          - ${OPENDUT_DOMAIN_SIGNAL}
-          - ${OPENDUT_DOMAIN_OPENTELEMETRY}
-          - ${OPENDUT_DOMAIN_CARL}
-          - ${OPENDUT_DOMAIN_NETBIRD_RELAY}
+      - opendut_local
           #- ${OPENDUT_DOMAIN_NGINX_WEBDAV}  # Do not expose since this service is not secured
 
 
