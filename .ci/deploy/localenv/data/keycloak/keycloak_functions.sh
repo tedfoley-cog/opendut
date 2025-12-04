@@ -24,7 +24,7 @@ wait_for_keycloak() {
   echo "Keycloak ready"
 }
 kcadm() { local cmd="$1" ; shift ; "$KCADM_PATH" "$cmd" --config /tmp/kcadm.config "$@" ; }
-kcauth() { "$KCADM_PATH" config credentials --config /tmp/kcadm.config --server "$KEYCLOAK_URL" --realm master --user "$KEYCLOAK_ADMIN" --password "$KEYCLOAK_ADMIN_PASSWORD" ; }
+kcauth() { "$KCADM_PATH" config credentials --config /tmp/kcadm.config --server "$KEYCLOAK_URL" --realm master --user "$KC_BOOTSTRAP_ADMIN_USERNAME" --password "$KC_BOOTSTRAP_ADMIN_PASSWORD" ; }
 
 
 list_realms() {

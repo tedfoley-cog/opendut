@@ -6,6 +6,15 @@ x-common-healthcheck-params: &common-healthcheck-params
   start_period: 2m  # Probe failure during start will not be counted towards the maximum number of retries
   # start_interval: 5s  # This isn't yet supported on many hosts, as of 2025-01.
 
+
+x-keycloak-healthcheck-params: &keycloak-healthcheck-params
+  interval: 30s
+  timeout: 10s
+  retries: 5
+  start_period: 5m  # Probe failure during start will not be counted towards the maximum number of retries
+  # start_interval: 5s  # This isn't yet supported on many hosts, as of 2025-01.
+
+
 # common restart and logging settings
 x-default: &default
   restart: 'unless-stopped'
@@ -78,7 +87,7 @@ services:
       - traefik
     # this healthcheck requires the init container for provisioning
     healthcheck:
-      <<: *common-healthcheck-params
+      <<: *keycloak-healthcheck-params
       test: [ "CMD-SHELL", "curl --fail --silent --output /dev/null --noproxy '*' http://localhost:8080/realms/provisioning-done || exit 1" ]
     volumes:
       - provision-secrets-data:/provision:ro
@@ -94,8 +103,8 @@ services:
     - KC_PROXY_ADDRESS_FORWARDING=true
     - KC_PROXY_HEADERS=xforwarded
     - KC_HOSTNAME_STRICT=false
-    - KEYCLOAK_ADMIN=admin
-    - KEYCLOAK_ADMIN_PASSWORD
+    - KC_BOOTSTRAP_ADMIN_USERNAME=admin
+    - KC_BOOTSTRAP_ADMIN_PASSWORD=${KEYCLOAK_ADMIN_PASSWORD}
     labels:
       - traefik.enable=true
       - traefik.http.routers.keycloak.rule=Host(`${OPENDUT_DOMAIN_AUTH}`)
@@ -126,8 +135,8 @@ services:
       - SSL_CERT_FILE=${OPENDUT_CERT_CA_PATH}  # used by curl
       - KCADM_PATH=/opt/keycloak/bin/kcadm.sh
       - KEYCLOAK_URL=http://keycloak:8080
-      - KEYCLOAK_ADMIN=admin
-      - KEYCLOAK_ADMIN_PASSWORD
+      - KC_BOOTSTRAP_ADMIN_USERNAME=admin
+      - KC_BOOTSTRAP_ADMIN_PASSWORD=${KEYCLOAK_ADMIN_PASSWORD}
       - NETBIRD_MANAGEMENT_CLIENT_SECRET
       - OPENDUT_CARL_NETWORK_OIDC_CLIENT_SECRET
       - OPENDUT_CLEO_NETWORK_OIDC_CLIENT_SECRET
