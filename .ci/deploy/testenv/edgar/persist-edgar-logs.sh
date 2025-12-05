@@ -2,6 +2,8 @@
 set -e  # exit on error
 set -x
 
+COMMAND_TIMEOUT=20
+
 # persist edgar container logs
 LOG_DIRECTORY="${1:-./docker-logs}"
 
@@ -43,10 +45,10 @@ for EDGAR_NAME in $OPENDUT_EDGAR_CONTAINERS; do
   # running processes
   docker exec "$EDGAR_NAME" ps axu > "$LOG_DIRECTORY/$EDGAR_NAME/processes-ps-axu.log" 2>&1
   # NetBird status
-  docker exec "$EDGAR_NAME" /opt/opendut/edgar/netbird/netbird status > "$LOG_DIRECTORY/$EDGAR_NAME/netbird-status.log" 2>&1
-  docker exec "$EDGAR_NAME" /opt/opendut/edgar/netbird/netbird status --detail > "$LOG_DIRECTORY/$EDGAR_NAME/netbird-status-detail.log" 2>&1
+  docker exec "$EDGAR_NAME" timeout $COMMAND_TIMEOUT /opt/opendut/edgar/netbird/netbird status > "$LOG_DIRECTORY/$EDGAR_NAME/netbird-status.log" 2>&1
+  docker exec "$EDGAR_NAME" timeout $COMMAND_TIMEOUT /opt/opendut/edgar/netbird/netbird status --detail > "$LOG_DIRECTORY/$EDGAR_NAME/netbird-status-detail.log" 2>&1
   # persist WireGuard peer connection details
-  docker exec "$EDGAR_NAME" wg > "$LOG_DIRECTORY/$EDGAR_NAME/wg.log" 2>&1
+  docker exec "$EDGAR_NAME" timeout $COMMAND_TIMEOUT wg > "$LOG_DIRECTORY/$EDGAR_NAME/wg.log" 2>&1
 done
 
 #################################################
@@ -58,14 +60,14 @@ if docker ps --format '{{.Names}}' --filter "name=opendut-cleo" | grep -q "^open
   CLEO_SUBCOMMANDS="cluster-descriptors cluster-deployments peers devices"
   for COMMAND in $CLEO_SUBCOMMANDS
   do
-    docker exec opendut-cleo opendut-cleo list --output json "$COMMAND" > "$LOG_DIRECTORY"/cleo/opendut-cleo-"$COMMAND".json 2> "$LOG_DIRECTORY"/cleo/opendut-cleo-"$COMMAND".error.log
+    docker exec opendut-cleo timeout $COMMAND_TIMEOUT opendut-cleo list --output json "$COMMAND" > "$LOG_DIRECTORY"/cleo/opendut-cleo-"$COMMAND".json 2> "$LOG_DIRECTORY"/cleo/opendut-cleo-"$COMMAND".error.log
   done
 
   # Collect peer information
   if KNOWN_PEERS=$(docker exec opendut-cleo opendut-cleo list --output json peers | jq -r '.[].id'); then
     for PEER in $KNOWN_PEERS
     do
-      docker exec opendut-cleo opendut-cleo describe --output json peer "$PEER" > "$LOG_DIRECTORY"/cleo/opendut-cleo-peer-"$PEER".json 2> "$LOG_DIRECTORY"/cleo/opendut-cleo-peer-"$PEER".error.log
+      docker exec opendut-cleo timeout $COMMAND_TIMEOUT opendut-cleo describe --output json peer "$PEER" > "$LOG_DIRECTORY"/cleo/opendut-cleo-peer-"$PEER".json 2> "$LOG_DIRECTORY"/cleo/opendut-cleo-peer-"$PEER".error.log
     done
   fi
 else
