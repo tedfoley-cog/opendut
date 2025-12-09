@@ -6,3 +6,6 @@ tls:
           - '{{ env "OPENDUT_TRAEFIK_CLIENT_AUTH_CA_PATH" }}'
         clientAuthType: '{{ env "OPENDUT_TRAEFIK_CLIENT_AUTH_TYPE" }}'
       ocsp:
+    no-mtls:
+      clientAuth:
+        clientAuthType: NoClientCert

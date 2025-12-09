@@ -82,10 +82,17 @@ impl DockerCommand {
     }
 
     pub(crate) fn add_localenv_args(&mut self) -> &mut Self {
+        use std::path::Path;
         self.arg("compose")
             .arg("--file")
-            .arg("./.ci/deploy/localenv/docker-compose.yml")
-            .arg("--env-file")
+            .arg("./.ci/deploy/localenv/docker-compose.yml");
+        // Optionally include override file if present
+        let override_path = Path::new("./.ci/deploy/localenv/docker-compose.override.yml");
+        if override_path.exists() {
+            self.arg("--file").arg(override_path);
+        }
+
+        self.arg("--env-file")
             .arg("./.ci/deploy/localenv/.env.development")
     }
 

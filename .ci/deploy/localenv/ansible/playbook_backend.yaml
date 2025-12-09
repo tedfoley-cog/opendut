@@ -31,11 +31,36 @@
 
     - name: Force update CARL image  # With canary releases, we may re-use the same tag, which normally results in the new image not being pulled.
       # environment file might contain custom image version for CARL
-      command:
-        cmd: "docker compose --file .ci/deploy/localenv/docker-compose.yml --env-file {{ opendut_compose_environment_path }} --env-file .ci/deploy/localenv/data/secrets/.env pull --policy=always carl"
-        chdir: "{{ repo_dir }}"
+      # detect optional override file
+      block:
+        - stat:
+            path: "{{ repo_dir }}/.ci/deploy/localenv/docker-compose.override.yml"
+          register: override_file
+        - command:
+            cmd: >
+              docker compose
+              --file .ci/deploy/localenv/docker-compose.yml
+              {% if override_file.stat.exists %}
+              --file .ci/deploy/localenv/docker-compose.override.yml
+              {% endif %}
+              --env-file {{ opendut_compose_environment_path }}
+              --env-file .ci/deploy/localenv/data/secrets/.env
+              pull --policy=always carl
+            chdir: "{{ repo_dir }}"
 
     - name: Start containers
-      command:
-        cmd: "docker compose --file .ci/deploy/localenv/docker-compose.yml --env-file {{ opendut_compose_environment_path }} --env-file .ci/deploy/localenv/data/secrets/.env up --detach --build"
-        chdir: "{{ repo_dir }}"
+      block:
+        - stat:
+            path: "{{ repo_dir }}/.ci/deploy/localenv/docker-compose.override.yml"
+          register: override_file_up
+        - command:
+            cmd: >
+              docker compose
+              --file .ci/deploy/localenv/docker-compose.yml
+              {% if override_file_up.stat.exists %}
+              --file .ci/deploy/localenv/docker-compose.override*.yml
+              {% endif %}
+              --env-file {{ opendut_compose_environment_path }}
+              --env-file .ci/deploy/localenv/data/secrets/.env
+              up --detach --build
+            chdir: "{{ repo_dir }}"
