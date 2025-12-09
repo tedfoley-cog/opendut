@@ -380,14 +380,6 @@ services:
       - netbird-mgmt-data:/var/lib/netbird
       - netbird-mgmt-config:/etc/netbird/
       - ${SHARED_CERTS_HOST_DIR}:${SHARED_CERTS_MOUNT_DIR}:ro
-    command: [
-      "--port", "33073",
-      "--log-file", "console",
-      "--log-level", "info",
-      "--disable-anonymous-metrics=true",
-      "--single-account-mode-domain=netbird.selfhosted",
-      "--dns-domain=${OPENDUT_DOMAIN_NETBIRD}"
-    ]
     environment:
       # Keycloak user
       - KEYCLOAK_ADMIN=admin
@@ -418,7 +410,7 @@ services:
       # OpenDuT specific setting, we disable default policy to avoid auto allowing all traffic
       - NETBIRD_MGMT_DISABLE_DEFAULT_POLICY=true
       # HttpConfig
-      - NETBIRD_MGMT_API_PORT=33073  # TODO: check if redundant with --port argument
+      - NETBIRD_MGMT_API_PORT=80  # see .ci/deploy/localenv/data/netbird/management_init.sh
       - NETBIRD_MGMT_API_CERT_FILE=
       - NETBIRD_MGMT_API_CERT_KEY_FILE=
       - NETBIRD_DATASTORE_ENC_KEY
@@ -458,15 +450,15 @@ services:
       # Netbird API REST endpoint
       - traefik.http.routers.netbird-api.rule=Host(`${OPENDUT_DOMAIN_NETBIRD_API}`) && PathPrefix(`/api`)
       - traefik.http.routers.netbird-api.service=netbird-api
-      - traefik.http.services.netbird-api.loadbalancer.server.port=33073
+      - traefik.http.services.netbird-api.loadbalancer.server.port=80
       # Websocket proxy
       - traefik.http.routers.netbird-wsproxy-mgmt.rule=Host(`${OPENDUT_DOMAIN_NETBIRD_API}`) && PathPrefix(`/ws-proxy/management`)
       - traefik.http.routers.netbird-wsproxy-mgmt.service=netbird-wsproxy-mgmt
-      - traefik.http.services.netbird-wsproxy-mgmt.loadbalancer.server.port=33073
+      - traefik.http.services.netbird-wsproxy-mgmt.loadbalancer.server.port=80
       # Netbird API GRPC endpoint
       - traefik.http.routers.netbird-management.rule=Host(`${OPENDUT_DOMAIN_NETBIRD_API}`) && PathPrefix(`/management.ManagementService/`)
       - traefik.http.routers.netbird-management.service=netbird-management
-      - traefik.http.services.netbird-management.loadbalancer.server.port=33073
+      - traefik.http.services.netbird-management.loadbalancer.server.port=80
       - traefik.http.services.netbird-management.loadbalancer.server.scheme=h2c
       # Logging
       - logging=alloy
