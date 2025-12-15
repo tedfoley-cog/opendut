@@ -1,0 +1,43 @@
+# Docker Compose override file for local environment deployment
+# This file can be used to customize or extend the default docker-compose.yml configuration. 
+
+services:
+
+  traefik:
+    environment:
+      - OPENDUT_TRAEFIK_CLIENT_AUTH_TYPE=RequireAndVerifyClientCert  # enable mTLS
+    networks: !override
+    - opendut_local
+
+  traefik-internal:
+    container_name: opendut-traefik-no-mtls
+    extends:
+      file: ./docker-compose.yml
+      service: traefik
+
+    volumes: !override
+      - ${OPENDUT_TRAEFIK_CONFIG_PATH:-./data/traefik/config/}:/etc/traefik/dynamic
+      - provision-secrets-data:/provision:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ${SHARED_CERTS_HOST_DIR}:${SHARED_CERTS_MOUNT_DIR}:ro
+    # override the ports to avoid conflict with the first Traefik instance
+    ports: !override
+      - "127.0.0.1:8082:8080"  # 2nd Traefik dashboard, only on localhost, do not expose publicly
+
+
+  netbird-management:
+    labels:
+      - traefik.http.routers.netbird-api.tls.options=no-mtls@file
+      - traefik.http.routers.netbird-wsproxy-mgmt.tls.options=no-mtls@file
+      - traefik.http.routers.netbird-management.tls.options=no-mtls@file
+
+  netbird-signal:
+    labels:
+      - traefik.http.routers.netbird-wsproxy-signal.tls.options=no-mtls@file
+      - traefik.http.routers.netbird-signal.tls.options=no-mtls@file
+
+  netbird-relay:
+    labels:
+      - traefik.http.routers.netbird-relay.tls.options=no-mtls@file
+
+
