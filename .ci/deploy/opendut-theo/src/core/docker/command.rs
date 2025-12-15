@@ -87,7 +87,7 @@ impl DockerCommand {
             .arg("--file")
             .arg("./.ci/deploy/localenv/docker-compose.yml");
         // Optionally include override file if present
-        let override_path = Path::new("./.ci/deploy/localenv/docker-compose.override.yml");
+        let override_path = PathBuf::project_path_buf().join("./.ci/deploy/localenv/docker-compose.override.yml");
         if override_path.exists() {
             self.arg("--file").arg(override_path);
         }
