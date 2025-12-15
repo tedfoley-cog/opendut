@@ -50,16 +50,22 @@
 
     - name: Start containers
       block:
-        - stat:
-            path: "{{ repo_dir }}/.ci/deploy/localenv/docker-compose.override.yml"
-          register: override_file_up
+        - name: Find all docker compose override files
+          ansible.builtin.find:
+            paths: "{{ repo_dir }}/.ci/deploy/localenv/"
+            patterns: '*.override.yml'
+          register: _find_docker_compose_override_files
+
+        - name: Extract found docker compose override file paths
+          set_fact:
+            docker_compose_override_files: "{{ _find_docker_compose_override_files.files | map(attribute='path') | list }}"
         - command:
             cmd: >
               docker compose
               --file .ci/deploy/localenv/docker-compose.yml
-              {% if override_file_up.stat.exists %}
-              --file .ci/deploy/localenv/docker-compose.override*.yml
-              {% endif %}
+              {% for path in docker_compose_override_files %}
+              --file {{ path }}
+              {% endfor %}
               --env-file {{ opendut_compose_environment_path }}
               --env-file .ci/deploy/localenv/data/secrets/.env
               up --detach --build
