@@ -29,25 +29,6 @@
     - name: Set carl image version
       include_tasks: tasks/carl_image_version.yaml
 
-    - name: Force update CARL image  # With canary releases, we may re-use the same tag, which normally results in the new image not being pulled.
-      # environment file might contain custom image version for CARL
-      # detect optional override file
-      block:
-        - stat:
-            path: "{{ repo_dir }}/.ci/deploy/localenv/docker-compose.override.yml"
-          register: override_file
-        - command:
-            cmd: >
-              docker compose
-              --file .ci/deploy/localenv/docker-compose.yml
-              {% if override_file.stat.exists %}
-              --file .ci/deploy/localenv/docker-compose.override.yml
-              {% endif %}
-              --env-file {{ opendut_compose_environment_path }}
-              --env-file .ci/deploy/localenv/data/secrets/.env
-              pull --policy=always carl
-            chdir: "{{ repo_dir }}"
-
     - name: Start containers
       block:
         - name: Find all docker compose override files
@@ -59,14 +40,32 @@
         - name: Extract found docker compose override file paths
           set_fact:
             docker_compose_override_files: "{{ _find_docker_compose_override_files.files | map(attribute='path') | list }}"
-        - command:
+
+        - name: Force update CARL image  # With canary releases, we may re-use the same tag, which normally results in the new image not being pulled.
+          # environment file might contain custom image version for CARL
+          # detect optional override file
+          command:
             cmd: >
               docker compose
-              --file .ci/deploy/localenv/docker-compose.yml
-              {% for path in docker_compose_override_files %}
-              --file {{ path }}
-              {% endfor %}
-              --env-file {{ opendut_compose_environment_path }}
-              --env-file .ci/deploy/localenv/data/secrets/.env
-              up --detach --build
+                --file .ci/deploy/localenv/docker-compose.yml
+                {% for path in docker_compose_override_files %}
+                --file .ci/deploy/localenv/docker-compose.override.yml
+                {% endfor %}
+                --env-file {{ opendut_compose_environment_path }}
+                --env-file .ci/deploy/localenv/data/secrets/.env
+                pull --policy=always carl
+            chdir: "{{ repo_dir }}"
+          changed_when: False  # Prevent marking the playbook as changed just because we pulled an image.
+
+        - name: Start all containers
+          command:
+            cmd: >
+              docker compose
+                --file .ci/deploy/localenv/docker-compose.yml
+                {% for path in docker_compose_override_files %}
+                --file {{ path }}
+                {% endfor %}
+                --env-file {{ opendut_compose_environment_path }}
+                --env-file .ci/deploy/localenv/data/secrets/.env
+                up --detach --build
             chdir: "{{ repo_dir }}"
