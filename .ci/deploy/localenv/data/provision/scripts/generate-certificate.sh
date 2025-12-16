@@ -28,7 +28,7 @@ fi
 openssl req -new -sha512 -passout file:"$OPENDUT_PASSWORD_FILE" -out "$CERT_PATH".csr -newkey rsa:4096 -keyout "$CERT_PATH".key -subj "/CN=$SERVERNAME/C=XX/ST=Some-State/O=ExampleOrg"
 
 
-#create a v3 ext file for SAN properties
+# Create a v3 ext file with SAN properties
 cat > "$CERT_PATH".v3.ext << EOF
 authorityKeyIdentifier=keyid,issuer
 basicConstraints=CA:FALSE
@@ -39,7 +39,7 @@ DNS.1 = $SERVERNAME
 EOF
 
 
-# CARL certificate signing
+# certificate signing
 openssl x509 -req -in "$CERT_PATH".csr -CA "$CA_PATH".pem -CAkey "$CA_PATH".key -passin file:"$OPENDUT_PASSWORD_FILE" -CAcreateserial -outform PEM -out "$CERT_PATH".pem -days 9999 -sha256 -extfile "$CERT_PATH".v3.ext
 
 

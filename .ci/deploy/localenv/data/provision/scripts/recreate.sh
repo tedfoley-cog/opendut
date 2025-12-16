@@ -35,3 +35,8 @@ done
 /scripts/generate-certificate.sh "${OPENDUT_DOMAIN_NGINX_WEBDAV}"
 /scripts/generate-certificate.sh "${OPENDUT_DOMAIN_OPENTELEMETRY}"
 /scripts/generate-certificate.sh "${OPENDUT_DOMAIN_MONITORING}"
+
+# Create a client certificate for authentication purposes
+/scripts/generate-client-certificate.sh "opendut-auth-client"
+/scripts/generate-client-certificate.sh "opendut-browser-client"
+/scripts/generate-client-certificate.sh "edgar-leader"
