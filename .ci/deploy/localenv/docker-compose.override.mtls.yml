@@ -15,11 +15,6 @@ services:
       file: ./docker-compose.yml
       service: traefik
 
-    volumes: !override
-      - ${OPENDUT_TRAEFIK_CONFIG_PATH:-./data/traefik/config/}:/etc/traefik/dynamic
-      - provision-secrets-data:/provision:ro
-      - /var/run/docker.sock:/var/run/docker.sock
-      - ${SHARED_CERTS_HOST_DIR}:${SHARED_CERTS_MOUNT_DIR}:ro
     # override the ports to avoid conflict with the first Traefik instance
     ports: !override
       - "127.0.0.1:8082:8080"  # 2nd Traefik dashboard, only on localhost, do not expose publicly
