@@ -5,6 +5,7 @@ use tonic::transport::{Certificate, ClientTlsConfig, Identity};
 use url::Url;
 use opendut_util_core::pem::{self, Pem, PemFromConfig};
 use std::fmt::Debug;
+use tracing::debug;
 
 pub struct OpentelemetryConfig {
     pub(crate) confidential_client: Option<ConfidentialClientRef>,
@@ -46,6 +47,7 @@ pub enum Opentelemetry {
 }
 
 impl Opentelemetry {
+    #[tracing::instrument(name="opentelemetry_load_from_config", skip_all)]
     pub async fn load(config: &config::Config, service_metadata: ServiceMetadata) -> Result<Self, OpentelemetryConfigError> {
         let field = String::from("opentelemetry.enabled");
         let opentelemetry_enabled = config.get_bool("opentelemetry.enabled")
@@ -153,6 +155,7 @@ impl Opentelemetry {
 
                     if let Some(opendut_ca) = opendut_ca {
                         let certificate = Certificate::from_pem(opendut_ca.to_string());
+                        debug!("Creating OpenTelemetry client with CA certificate provided.");
                         client_tls_config = client_tls_config.ca_certificate(certificate);
                     } else {
                         client_tls_config = client_tls_config.with_native_roots();
@@ -160,7 +163,7 @@ impl Opentelemetry {
                 }
 
                 {
-                    let enabled = {
+                    let mtls_enabled = {
                         let field = pem::config_keys::OPENTELEMETRY_TLS_CLIENT_AUTH_ENABLED;
 
                         config.get_bool(field)
@@ -170,7 +173,7 @@ impl Opentelemetry {
                             })?
                     };
 
-                    if enabled {
+                    if mtls_enabled {
                         let mtls_certificate = load_pem(
                             pem::config_keys::OPENTELEMETRY_TLS_CLIENT_AUTH_CERTIFICATE,
                             pem::config_keys::DEFAULT_NETWORK_TLS_CLIENT_AUTH_CERTIFICATE,
@@ -188,6 +191,7 @@ impl Opentelemetry {
                         })?;
 
                         let identity = Identity::from_pem(mtls_certificate.to_string(), mtls_key.to_string());
+                        debug!("Creating OpenTelemetry client with mTLS client auth identity provided.");
                         client_tls_config = client_tls_config.identity(identity);
                     }
                 }

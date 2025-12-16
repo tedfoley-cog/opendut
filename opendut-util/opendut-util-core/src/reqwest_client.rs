@@ -7,26 +7,28 @@ pub mod oidc {
     use anyhow::{anyhow, Context};
     use config::Config;
     use reqwest::{Certificate, Identity};
+    use tracing::debug;
     use crate::pem::{self, Pem, PemFromConfig};
     use super::{construct_reqwest_identity_from_two_pems, ReqwestClient};
 
+    #[tracing::instrument(name="oidc_client_create", skip_all)]
     pub fn create_from_config(config: &Config) -> anyhow::Result<ReqwestClient> {
         let opendut_ca = Pem::read_from_configured_path_or_content(
-            pem::config_keys::OIDC_TLS_CA,
+            pem::config_keys::NETWORK_OIDC_CLIENT_TLS_CA,
             Some(pem::config_keys::DEFAULT_NETWORK_TLS_CA),
             config
         )?;
 
         let identity =
-            if config.get_bool(pem::config_keys::OIDC_TLS_CLIENT_AUTH_ENABLED)? {
+            if config.get_bool(pem::config_keys::NETWORK_OIDC_CLIENT_TLS_CLIENT_AUTH_ENABLED)? {
                 let certificate = Pem::read_from_configured_path_or_content(
-                    pem::config_keys::OIDC_TLS_CLIENT_AUTH_CERTIFICATE,
+                    pem::config_keys::NETWORK_OIDC_CLIENT_TLS_CLIENT_AUTH_CERTIFICATE,
                     Some(pem::config_keys::DEFAULT_NETWORK_TLS_CLIENT_AUTH_CERTIFICATE),
                     config
                 )?.context("No certificate found for mTLS client authentication in OIDC")?;
 
                 let key = Pem::read_from_configured_path_or_content(
-                    pem::config_keys::OIDC_TLS_CLIENT_AUTH_KEY,
+                    pem::config_keys::NETWORK_OIDC_CLIENT_TLS_CLIENT_AUTH_KEY,
                     Some(pem::config_keys::DEFAULT_NETWORK_TLS_CLIENT_AUTH_KEY),
                     config
                 )?.context("No key found for mTLS client authentication in OIDC")?;
@@ -56,6 +58,7 @@ pub mod oidc {
             .tls_built_in_root_certs(true);
 
         if let Some(ca_certificate) = ca_certificate {
+            debug!("Constructing reqwest client with CA certificate provided.");
             let reqwest_certificate = Certificate::from_pem(ca_certificate.to_string().as_bytes())
                 .map_err(|cause| anyhow!(cause.to_string()))?;
 
@@ -63,6 +66,7 @@ pub mod oidc {
         }
 
         if let Some(client_auth_identity) = client_auth_identity {
+            debug!("Constructing reqwest client with mTLS client auth identity provided.");
             client = client.identity(client_auth_identity);
         }
 

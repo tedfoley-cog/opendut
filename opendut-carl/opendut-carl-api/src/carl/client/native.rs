@@ -38,6 +38,7 @@ pub struct CarlClient {
 
 impl CarlClient {
 
+    #[tracing::instrument(name="carl_client_create", skip_all)]
     pub async fn create(
         host: &str,
         port: u16,
