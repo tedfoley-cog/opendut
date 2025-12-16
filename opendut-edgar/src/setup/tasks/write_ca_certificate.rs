@@ -31,6 +31,9 @@ impl Task for WriteCaCertificate {
 
     async fn check_present(&self) -> anyhow::Result<TaskStateFulfilled> {
 
+        let _ = determine_update_ca_certificates_path()?; //check `which update-ca-certificates` beforehand to avoid us writing certificate files without it being possible to import them into OS (this would cause us to not re-run the task, since we only check for the files to exist).
+
+
         if self.carl_ca_certificate_path.exists().not()
         || self.os_cert_store_ca_certificate_path.exists().not() {
             debug!("Previous certificate files don't exist. Task needs execution.");
@@ -128,11 +131,10 @@ fn write_os_cert_store_certificate(
     fs::copy(
         carl_ca_certificate_path,
         os_cert_store_ca_certificate_path,
-    ).context(format!(
-        "Copying CA certificate from {carl_ca_certificate_path:?} to {os_cert_store_ca_certificate_path:?} was not possible."))?;
+    )
+    .context(format!("Copying CA certificate from {carl_ca_certificate_path:?} to {os_cert_store_ca_certificate_path:?} was not possible."))?;
 
-    let update_ca_certificates = which::which("update-ca-certificates")
-        .context(String::from("No command `update-ca-certificates` found. Ensure your system provides this command."))?;
+    let update_ca_certificates = determine_update_ca_certificates_path()?;
 
     command_runner.run(
         &mut Command::new(update_ca_certificates) //Update OS certificate store, as NetBird and reqwest (for result uploading to WebDAV) reads from there
@@ -145,6 +147,13 @@ fn write_os_cert_store_certificate(
         .context(format!("Writing checksum for OS cert store ca certificate to '{}'.", checksum_unpack_file.display()))?;
 
     Ok(())
+}
+
+fn determine_update_ca_certificates_path() -> anyhow::Result<PathBuf> {
+    let update_ca_certificates = which::which("update-ca-certificates")
+        .context(String::from("No command `update-ca-certificates` found. Ensure your system provides this command."))?;
+
+    Ok(update_ca_certificates)
 }
 
 #[cfg(test)]

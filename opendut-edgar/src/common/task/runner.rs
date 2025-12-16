@@ -31,10 +31,10 @@ async fn run_tasks(
     run_mode: RunMode,
 ) -> Result<(), TaskExecutionError> {
     let progress_style = ProgressBarForCLI::progress_style();
+
     for task in tasks {
         let progress_bar_cli = ProgressBarForCLI::new(task.description(), run_mode, progress_style.clone());
-        let is_fulfilled = task.check_present()
-            .await
+        let is_fulfilled = task.check_present().await
             .map_err(|error| TaskExecutionError::DetermineSystemStateBefore { task_name: task.description(), error })?;
 
         let outcome = match is_fulfilled {
@@ -43,8 +43,8 @@ async fn run_tasks(
                 if run_mode == RunMode::SetupDryRun {
                     Outcome::DryRun
                 } else {
-                    let result = task.make_present()
-                        .await;
+                    let result = task.make_present().await;
+
                     progress_bar_cli.finish_and_clear();
                     match result {
                         Ok(success) => Outcome::Changed(success),
