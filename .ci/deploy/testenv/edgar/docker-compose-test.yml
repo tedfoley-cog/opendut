@@ -1,0 +1,38 @@
+# test environment for EDGAR
+# Container is explicitly not run with the opendut docker network enabled!
+
+# docker compose -f .ci/deploy/testenv/edgar/docker-compose.yml -f .ci/deploy/testenv/edgar/docker-compose-test.yml --env-file .ci/deploy/localenv/data/secrets/.env --env-file .env-theo up -d
+# docker exec -ti edgar-test bash
+# docker stop edgar-test
+
+
+services:
+  leader:
+    container_name: edgar-test
+    command: sleep infinity
+    extra_hosts:
+      - "carl.opendut.local:192.168.56.10"  # 192.168.56.10 is only valid within the opendut-vm
+      - "auth.opendut.local:192.168.56.10"
+      - "netbird-relay.opendut.local:192.168.56.10"
+      - "netbird-api.opendut.local:192.168.56.10"
+      - "netbird.opendut.local:192.168.56.10"
+    environment: !override  # do not use secrets from default environment
+      - OPENDUT_CARL_VERSION
+
+    networks:
+      - opendut_other
+
+  peer:
+    command: /opt/managed.sh
+    #command: sleep infinity
+    deploy:
+      mode: replicated
+      replicas: 0
+
+volumes:
+  opendut_provision-secrets-data:
+    external: true
+
+networks:
+  opendut_other:
+    name: opendut_other
