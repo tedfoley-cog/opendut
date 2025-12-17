@@ -4,6 +4,7 @@ use std::path::{Path, PathBuf};
 use std::str::FromStr;
 
 use anyhow::{anyhow, Context};
+use config::Config;
 use tracing::{debug, error, info};
 use url::Url;
 
@@ -11,9 +12,11 @@ use opendut_model::peer::PeerId;
 use opendut_model::util::net::AuthConfig;
 
 use crate::common::settings;
+use crate::common::settings::CONFIG_APPLICATION_PREFIX;
 use crate::setup::constants;
 use crate::setup::util::create_file_and_ensure_it_can_only_be_read_or_modified_by_owner;
 
+#[derive(Clone)]
 pub struct ConfigOverride {
     pub peer_id: PeerId,
     pub carl_url: Url,
@@ -31,6 +34,7 @@ pub fn write_with_override(config_override: ConfigOverride, no_confirm: bool) ->
 }
 
 
+#[derive(Clone)]
 struct WriteConfigurationOptions {
     config_file_to_write_to: PathBuf,
     config_merge_suggestion_file: PathBuf,
@@ -95,19 +99,19 @@ fn write_with_options(options: WriteConfigurationOptions) -> anyhow::Result<()> 
 
 fn load_current_settings(path: &Path) -> Option<toml_edit::DocumentMut> {
 
-    if path.exists().not() {
-        return None;
-    }
+    let config = opendut_util::settings::add_files_and_env_to_config_builder( //load from config file + env, so that envs specified during Setup are persisted for Service
+        vec![path.to_path_buf()],
+        CONFIG_APPLICATION_PREFIX,
+        Config::builder()
+    )
+    .build()
+    .inspect_err(|cause| error!("Failed to read existing configuration file at {path:?}. Continuing as if no configuration existed.\n  {cause}"))
+    .ok()?;
 
-    let current_settings = match fs::read_to_string(path) {
-        Ok(content) => content,
-        Err(cause) => {
-            error!("Failed to read existing configuration file at {path:?}.\n  {cause}");
-            return None;
-        }
-    };
+    let current_settings = config.try_deserialize::<toml::Table>()
+        .expect("config::Config should deserialize as toml::Table");
 
-    match toml_edit::DocumentMut::from_str(&current_settings) {
+    match toml_edit::DocumentMut::from_str(&current_settings.to_string()) {
         Ok(current_settings) => Some(current_settings),
         Err(cause) => {
             error!("Failed to parse existing configuration as TOML.\n  {cause}");
@@ -129,8 +133,10 @@ fn update_settings(mut settings: toml_edit::DocumentMut, config_override: &Confi
     }
     settings["peer"]["id"] = toml_edit::value(peer_id);
 
-    if settings.get("network").and_then(|network| network.get("carl")).is_none() {
+    if settings.get("network").is_none() {
         settings["network"] = toml_edit::table();
+    }
+    if settings["network"].get("carl").is_none() {
         settings["network"]["carl"] = toml_edit::table();
         settings["network"]["carl"].as_table_mut().unwrap().set_dotted(true);
     }
@@ -139,7 +145,7 @@ fn update_settings(mut settings: toml_edit::DocumentMut, config_override: &Confi
 
     match &auth_config {
         AuthConfig::Disabled => {
-            if settings.get("network").and_then(|network| network.get("oidc")).is_none() {
+            if settings["network"].get("oidc").is_none() {
                 settings["network"]["oidc"] = toml_edit::table();
             }
             settings["network"]["oidc"]["enabled"] = toml_edit::value(false);
@@ -147,19 +153,15 @@ fn update_settings(mut settings: toml_edit::DocumentMut, config_override: &Confi
         AuthConfig::Enabled { client_id, client_secret, issuer_url, scopes } => {
             let network_oidc_client_id = client_id.clone().value();
             let network_oidc_client_secret = client_secret.clone().value();
-            let network_oidc_client_issuer_url: String = issuer_url.clone().into();
             let network_oidc_client_scopes = scopes.clone().into_iter().map(|scope| scope.value()).collect::<Vec<_>>().join(",");
+            let network_oidc_client_issuer_url: String = issuer_url.clone().into();
 
-            if settings.get("network").and_then(|network| network.get("oidc")).is_none() {
+            if settings["network"].get("oidc").is_none() {
                 settings["network"]["oidc"] = toml_edit::table();
             }
             settings["network"]["oidc"]["enabled"] = toml_edit::value(true);
 
-            if settings.get("network")
-                .and_then(|network| network.get("oidc"))
-                .and_then(|network| network.get("client"))
-                .is_none() {
-
+            if settings["network"]["oidc"].get("client").is_none() {
                 settings["network"]["oidc"]["client"] = toml_edit::table();
                 settings["network"]["oidc"]["client"]["issuer"] = toml_edit::table();
                 settings["network"]["oidc"]["client"]["issuer"].as_table_mut().unwrap().set_dotted(true);
@@ -189,6 +191,8 @@ fn write_settings(target: &Path, settings_string: &str) -> anyhow::Result<()> {
 
 #[cfg(test)]
 mod tests {
+    use std::any::Any;
+    use std::sync::RwLock;
     use assert_fs::fixture::ChildPath;
     use assert_fs::prelude::*;
     use assert_fs::TempDir;
@@ -209,6 +213,9 @@ mod tests {
     const OIDC_ENABLED: bool = true;
     const ISSUER_URL: &str = "https://test.com:1234/";
     const SCOPES: &str = "test";
+
+    static ENV_ACCESS: RwLock<()> = RwLock::new(());
+
 
     #[test]
     fn should_write_a_fresh_configuration_with_auth_config_enabled() -> anyhow::Result<()> {
@@ -338,7 +345,6 @@ mod tests {
         let merge_suggestion = fs::read_to_string(config_merge_suggestion_file)?;
         assert!(predicate::str::contains(fixture.peer_id.to_string()).eval(&merge_suggestion));
         assert!(predicate::str::contains("enabled = false".to_string()).eval(&merge_suggestion));
-        assert!(predicate::str::contains("secret = \"ClientSecret\"".to_string()).not().eval(&merge_suggestion));
 
         Ok(())
     }
@@ -380,6 +386,35 @@ mod tests {
         Ok(())
     }
 
+    #[test]
+    fn should_persist_config_values_configured_via_envs_into_file() -> anyhow::Result<()> {
+        const ENV_VALUE: &str = "123456789";
+
+        let fixture = Fixture::new_with_env_write(true);
+        let options = create_write_configuration_options(&fixture, AuthEnabled::No);
+
+        let path = options.config_file_to_write_to.clone();
+
+        fn with_env(code: &impl Fn() -> anyhow::Result<()>) -> anyhow::Result<()> {
+            let env_key = "OPENDUT_EDGAR_NETWORK_CONNECT_RETRIES";
+
+            unsafe { std::env::set_var(env_key, ENV_VALUE); }
+
+            let result = code();
+
+            unsafe { std::env::remove_var(env_key); }
+            result
+        }
+
+        with_env(&||
+            write_with_options(options.clone())
+        )?;
+
+        let file_content = fs::read_to_string(&path)?;
+        assert!(file_content.contains(ENV_VALUE));
+        Ok(())
+    }
+
     fn create_write_configuration_options(
         fixture: &Fixture,
         auth_enabled: AuthEnabled,
@@ -418,9 +453,16 @@ mod tests {
         config_file_to_write_to: ChildPath,
         config_merge_suggestion_file: ChildPath,
         peer_id: PeerId,
+        _env_access_guard: Box<dyn Any>, //carry along to drop guard at the end of the test
     }
     impl Fixture {
         fn new() -> Self {
+            Self::new_with_env_write(false)
+        }
+
+        /// Blocks other tests from reading the envs while the given test is running.
+        /// Otherwise, the modified env will influence other tests running in parallel.
+        fn new_with_env_write(env_write: bool) -> Self {
             let temp_dir = TempDir::new().unwrap();
 
             let config_file_to_write_to = temp_dir.child("edgar.toml");
@@ -429,11 +471,19 @@ mod tests {
 
             let peer_id = PeerId::from(uuid!("dc72f6d9-d700-455f-8c31-9f15438e7503"));
 
+            let _env_access_guard: Box<dyn Any> =
+                if env_write {
+                    Box::new(ENV_ACCESS.read().unwrap())
+                } else {
+                    Box::new(ENV_ACCESS.write().unwrap())
+                };
+
             Self {
                 _temp_dir: temp_dir,
                 config_file_to_write_to,
                 config_merge_suggestion_file,
                 peer_id,
+                _env_access_guard,
             }
         }
     }

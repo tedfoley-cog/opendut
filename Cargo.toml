@@ -168,7 +168,7 @@ thiserror = "2.0.11"
 tokio = { version = "1.43.0", default-features = false }
 tokio-stream = { version = "0.1.17", default-features = false }
 tokio-util = { version = "0.7.*" }
-toml = { version = "0.9.*" }
+toml = { version = "0.9.*", default-features = false }
 toml_edit = "0.23.4"
 tonic = { version = "0.14.2", default-features = false }
 tonic-prost = "0.14.2"

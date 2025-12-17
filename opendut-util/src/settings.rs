@@ -4,7 +4,8 @@ use std::fs;
 use std::path::{PathBuf};
 
 pub use config::{Config, ConfigError, FileFormat};
-
+use config::builder::DefaultState;
+use config::ConfigBuilder;
 use crate::project;
 
 #[derive(thiserror::Error, Debug)]
@@ -100,17 +101,7 @@ pub fn load_config(name: &str, defaults: &str, defaults_format: FileFormat, over
             (used, declared)
         });
 
-    let builder = sources_used.iter()
-        .cloned()
-        .fold(builder, |builder, path| {
-            builder.add_source(config::File::from(path).required(false))
-        });
-
-    let builder = builder.add_source(
-        config::Environment::with_prefix(&format!("OPENDUT_{}", name.to_uppercase()))
-            .separator("_")
-            .try_parsing(true)
-    );
+    let builder = add_files_and_env_to_config_builder(sources_used.clone(), name, builder);
 
     let settings = builder.add_source(overrides);
     let secret_redacted_settings = settings.clone()
@@ -122,6 +113,23 @@ pub fn load_config(name: &str, defaults: &str, defaults_format: FileFormat, over
         config_files_used: sources_used,
         config_files_declared: sources_declared,
     })
+}
+
+pub fn add_files_and_env_to_config_builder(
+    sources: Vec<PathBuf>,
+    name: &str,
+    builder: ConfigBuilder<DefaultState>,
+) -> ConfigBuilder<DefaultState> {
+    let builder = sources.into_iter()
+        .fold(builder, |builder, path| {
+            builder.add_source(config::File::from(path).required(false))
+        });
+
+    builder.add_source(
+        config::Environment::with_prefix(&format!("OPENDUT_{}", name.to_uppercase()))
+            .separator("_")
+            .try_parsing(true)
+    )
 }
 
 #[derive(Clone)]

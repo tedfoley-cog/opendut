@@ -14,6 +14,7 @@ Always create a database backup before upgrading CARL.
 ### Changed
 * Netbird: Update NetBird to version 0.60.2.
 * API: Change NetBird SetupKey from UUID to String (breaking change).
+* EDGAR: Persist into configuration file when configuration values are set via environment variables during EDGAR Setup.
 
 ## [0.8.0] - 2025-11-20
 
