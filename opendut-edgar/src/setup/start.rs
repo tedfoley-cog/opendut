@@ -41,14 +41,14 @@ pub(super) async fn managed(
     }
 
     if dry_run.not() {
-        write_configuration::WriteConfiguration::with_override(
+        write_configuration::write_with_override(
             write_configuration::ConfigOverride {
                 peer_id: peer_setup.id,
                 carl_url: peer_setup.carl,
                 auth_config: peer_setup.auth_config,
             },
             no_confirm,
-        ).execute().await?;
+        )?;
     }
 
     let mut tasks: Vec<Box<dyn Task>> = vec![];

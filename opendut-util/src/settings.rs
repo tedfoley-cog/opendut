@@ -114,7 +114,7 @@ pub fn load_config(name: &str, defaults: &str, defaults_format: FileFormat, over
 
     let settings = builder.add_source(overrides);
     let secret_redacted_settings = settings.clone()
-        .add_source(secret_redacted_overrides);     
+        .add_source(secret_redacted_overrides);
 
     Ok(LoadedConfig {
         config: settings.build()?,
