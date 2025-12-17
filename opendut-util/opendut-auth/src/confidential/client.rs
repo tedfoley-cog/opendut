@@ -1,3 +1,4 @@
+use std::error::Error;
 use std::fmt::Formatter;
 use std::ops::Sub;
 use std::str::FromStr;
@@ -12,7 +13,7 @@ use tokio::sync::{Mutex, RwLock, RwLockWriteGuard, TryLockError};
 use tonic::{Request, Status};
 use tonic::metadata::MetadataValue;
 use tonic::service::Interceptor;
-use tracing::trace;
+use tracing::{error, trace};
 use backon::Retryable;
 use reqwest_middleware::ClientWithMiddleware;
 use tokio::runtime::Handle;
@@ -130,15 +131,24 @@ impl ConfidentialClient {
                 backon::ExponentialBuilder::default()
                     .with_max_delay(Duration::from_secs(120))
             )
-            .notify(|err: &reqwest::Error, dur: Duration| {
-                eprintln!("Retrying connection to issuer. {err:?} after {dur:?}");
+            .notify(|error: &reqwest::Error, duration: Duration| {
+
+                let mut error_message = format!("{error}");
+
+                let mut error: &dyn Error = error;
+                while let Some(source) = error.source() { //ensure all source errors get printed, too
+                    error_message += format!("\n    Caused by: {source}").as_str();
+                    error = source;
+                }
+
+                error!("Retrying connection to issuer. Had received error after {duration:?}: {error_message}");
             })
             .await;
 
         match backoff_result {
-            Ok(_) => { Ok(()) }
+            Ok(_) => Ok(()),
             Err(error) => {
-                Err(ConfidentialClientError::KeycloakConnection { message: String::from("Could not connect to keycloak"), cause: error })
+                Err(ConfidentialClientError::KeycloakConnection { message: String::from("Could not connect to Keycloak"), cause: error })
             }
         }
     }
