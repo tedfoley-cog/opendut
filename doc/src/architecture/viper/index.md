@@ -23,7 +23,7 @@ CARL -> VIPER_RT: Source definitions
 CARL <- VIPER_RT: Suite names & parameters
 UI <-- CARL: Suite names & parameters
 
-UI --> CARL: Store selected suite name & \n parameter values (RunDescriptor)
+UI --> CARL: Store selected suite name & \n parameter values (TestDescriptor)
 UI <-- CARL: Success
 
 == Running a test suite ==

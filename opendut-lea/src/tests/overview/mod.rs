@@ -22,7 +22,7 @@ pub fn TestsOverview() -> impl IntoView {
             let mut carl = carl.clone();
 
             async move {
-                carl.viper.list_viper_run_descriptors().await
+                carl.viper.list_viper_test_descriptors().await
                     .expect("Failed to request the list of tests / run descriptors.")
             }
         })

@@ -62,51 +62,51 @@ pub enum ListViperSourceDescriptorsError {
 
 
 //
-// ViperRunDescriptor
+// ViperTestDescriptor
 //
 
 #[derive(thiserror::Error, Debug)]
-pub enum StoreViperRunDescriptorError {
-    #[error("Test suite run <{run_id}> could not be created, due to internal errors:\n  {cause}")]
+pub enum StoreViperTestDescriptorError {
+    #[error("Test <{test_id}> could not be created, due to internal errors:\n  {cause}")]
     Internal {
-        run_id: ViperTestId,
+        test_id: ViperTestId,
         cause: String
     }
 }
 
 #[derive(thiserror::Error, Debug)]
-pub enum DeleteViperRunDescriptorError {
-    #[error("Test suite run <{run_id}> could not be deleted, because a run with that ID does not exist!")]
-    RunNotFound {
-        run_id: ViperTestId,
+pub enum DeleteViperTestDescriptorError {
+    #[error("Test <{test_id}> could not be deleted, because a test with that ID does not exist!")]
+    TestNotFound {
+        test_id: ViperTestId,
     },
-    #[error("Test suite run <{run_id}> could not be deleted, because a cluster deployment <{cluster_id}> using this run still exists!")]
+    #[error("Test <{test_id}> could not be deleted, because a cluster deployment <{cluster_id}> using this run still exists!")]
     ClusterDeploymentExists {
-        run_id: ViperTestId,
+        test_id: ViperTestId,
         cluster_id: ClusterId,
     },
-    #[error("Test suite run <{run_id}> deleted with internal errors:\n  {cause}")]
+    #[error("Test <{test_id}> deleted with internal errors:\n  {cause}")]
     Internal {
-        run_id: ViperTestId,
+        test_id: ViperTestId,
         cause: String,
     }
 }
 
 #[derive(thiserror::Error, Debug)]
-pub enum GetViperRunDescriptorError {
-    #[error("A test suite run with ID <{run_id}> could not be found!")]
-    RunNotFound {
-        run_id: ViperTestId
+pub enum GetViperTestDescriptorError {
+    #[error("A test with ID <{test_id}> could not be found!")]
+    TestNotFound {
+        test_id: ViperTestId
     },
-    #[error("An internal error occurred searching for a test suite run with ID <{run_id}>:\n  {cause}")]
+    #[error("An internal error occurred searching for a test with ID <{test_id}>:\n  {cause}")]
     Internal {
-        run_id: ViperTestId,
+        test_id: ViperTestId,
         cause: String
     }
 }
 
 #[derive(thiserror::Error, Debug)]
-pub enum ListViperRunDescriptorsError {
+pub enum ListViperTestDescriptorsError {
     #[error("An internal error occurred computing the list of test suite runs:\n  {cause}")]
     Internal {
         cause: String
@@ -298,84 +298,84 @@ mod client {
         }
 
 
-        pub async fn store_viper_run_descriptor(&mut self, descriptor: ViperTestDescriptor) -> Result<ViperTestId, ClientError<StoreViperRunDescriptorError>> {
+        pub async fn store_viper_test_descriptor(&mut self, descriptor: ViperTestDescriptor) -> Result<ViperTestId, ClientError<StoreViperTestDescriptorError>> {
 
-            let request = tonic::Request::new(test_manager::StoreViperRunDescriptorRequest {
-                run: Some(descriptor.into()),
+            let request = tonic::Request::new(test_manager::StoreViperTestDescriptorRequest {
+                test: Some(descriptor.into()),
             });
 
-            let response = self.inner.store_viper_run_descriptor(request).await?
+            let response = self.inner.store_viper_test_descriptor(request).await?
                 .into_inner();
 
             match extract!(response.reply)? {
-                test_manager::store_viper_run_descriptor_response::Reply::Failure(failure) => {
-                    let error = StoreViperRunDescriptorError::try_from(failure)?;
+                test_manager::store_viper_test_descriptor_response::Reply::Failure(failure) => {
+                    let error = StoreViperTestDescriptorError::try_from(failure)?;
                     Err(ClientError::UsageError(error))
                 }
-                test_manager::store_viper_run_descriptor_response::Reply::Success(success) => {
-                    let run_id = extract!(success.run_id)?;
-                    Ok(run_id)
+                test_manager::store_viper_test_descriptor_response::Reply::Success(success) => {
+                    let test_id = extract!(success.test_id)?;
+                    Ok(test_id)
                 }
             }
         }
 
 
-        pub async fn delete_viper_run_descriptor(&mut self, run_id: ViperTestId) -> Result<ViperTestId, ClientError<DeleteViperRunDescriptorError>> {
+        pub async fn delete_viper_test_descriptor(&mut self, test_id: ViperTestId) -> Result<ViperTestId, ClientError<DeleteViperTestDescriptorError>> {
 
-            let request = tonic::Request::new(test_manager::DeleteViperRunDescriptorRequest {
-                run_id: Some(run_id.into()),
+            let request = tonic::Request::new(test_manager::DeleteViperTestDescriptorRequest {
+                test_id: Some(test_id.into()),
             });
 
-            let response = self.inner.delete_viper_run_descriptor(request).await?
+            let response = self.inner.delete_viper_test_descriptor(request).await?
                 .into_inner();
 
             match extract!(response.reply)? {
-                test_manager::delete_viper_run_descriptor_response::Reply::Failure(failure) => {
-                    let error = DeleteViperRunDescriptorError::try_from(failure)?;
+                test_manager::delete_viper_test_descriptor_response::Reply::Failure(failure) => {
+                    let error = DeleteViperTestDescriptorError::try_from(failure)?;
                     Err(ClientError::UsageError(error))
                 }
-                test_manager::delete_viper_run_descriptor_response::Reply::Success(success) => {
-                    let run_id = extract!(success.run_id)?;
-                    Ok(run_id)
+                test_manager::delete_viper_test_descriptor_response::Reply::Success(success) => {
+                    let test_id = extract!(success.test_id)?;
+                    Ok(test_id)
                 }
             }
         }
 
-        pub async fn get_viper_run_descriptor(&mut self, run_id: ViperTestId) -> Result<ViperTestDescriptor, ClientError<GetViperRunDescriptorError>> {
+        pub async fn get_viper_test_descriptor(&mut self, run_id: ViperTestId) -> Result<ViperTestDescriptor, ClientError<GetViperTestDescriptorError>> {
 
-            let request = tonic::Request::new(test_manager::GetViperRunDescriptorRequest {
-                run_id: Some(run_id.into()),
+            let request = tonic::Request::new(test_manager::GetViperTestDescriptorRequest {
+                test_id: Some(run_id.into()),
             });
 
-            let response = self.inner.get_viper_run_descriptor(request).await?
+            let response = self.inner.get_viper_test_descriptor(request).await?
                 .into_inner();
 
             match extract!(response.reply)? {
-                test_manager::get_viper_run_descriptor_response::Reply::Failure(failure) => {
-                    let error = GetViperRunDescriptorError::try_from(failure)?;
+                test_manager::get_viper_test_descriptor_response::Reply::Failure(failure) => {
+                    let error = GetViperTestDescriptorError::try_from(failure)?;
                     Err(ClientError::UsageError(error))
                 }
-                test_manager::get_viper_run_descriptor_response::Reply::Success(success) => {
+                test_manager::get_viper_test_descriptor_response::Reply::Success(success) => {
                     let peer_descriptor = extract!(success.descriptor)?;
                     Ok(peer_descriptor)
                 }
             }
         }
 
-        pub async fn list_viper_run_descriptors(&mut self) -> Result<Vec<ViperTestDescriptor>, ClientError<ListViperRunDescriptorsError>> {
+        pub async fn list_viper_test_descriptors(&mut self) -> Result<Vec<ViperTestDescriptor>, ClientError<ListViperTestDescriptorsError>> {
 
-            let request = tonic::Request::new(test_manager::ListViperRunDescriptorsRequest {});
+            let request = tonic::Request::new(test_manager::ListViperTestDescriptorsRequest {});
 
-            let response = self.inner.list_viper_run_descriptors(request).await?
+            let response = self.inner.list_viper_test_descriptors(request).await?
                 .into_inner();
 
             match extract!(response.reply)? {
-                test_manager::list_viper_run_descriptors_response::Reply::Failure(failure) => {
-                    let error = ListViperRunDescriptorsError::try_from(failure)?;
+                test_manager::list_viper_test_descriptors_response::Reply::Failure(failure) => {
+                    let error = ListViperTestDescriptorsError::try_from(failure)?;
                     Err(ClientError::UsageError(error))
                 }
-                test_manager::list_viper_run_descriptors_response::Reply::Success(success) => {
-                    Ok(success.runs.into_iter()
+                test_manager::list_viper_test_descriptors_response::Reply::Success(success) => {
+                    Ok(success.tests.into_iter()
                         .map(ViperTestDescriptor::try_from)
                         .collect::<Result<Vec<_>, _>>()?
                     )

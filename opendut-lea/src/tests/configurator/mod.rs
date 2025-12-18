@@ -57,7 +57,7 @@ pub fn TestConfigurator() -> impl IntoView {
         let test_configuration_resource = LocalResource::new(move || {
             let mut carl = globals.client.clone();
             async move {
-                if let Ok(configuration) = carl.viper.get_viper_run_descriptor(test_id).await {
+                if let Ok(configuration) = carl.viper.get_viper_test_descriptor(test_id).await {
                     test_configuration.update(|user_configuration| {
                         let ViperTestDescriptor { id: _, name, source, suite, cluster, parameters } = configuration;
 

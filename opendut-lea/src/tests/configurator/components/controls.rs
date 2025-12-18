@@ -75,11 +75,11 @@ fn SaveTestButton(
         leptos::task::spawn_local(async move {
             pending.set(true);
 
-            let run_descriptor = ViperTestDescriptor::try_from(configuration.get_untracked());
-            match run_descriptor {
-                Ok(run_descriptor) => {
-                    let test_id = run_descriptor.id;
-                    let result = carl.viper.store_viper_run_descriptor(run_descriptor).await;
+            let test_descriptor = ViperTestDescriptor::try_from(configuration.get_untracked());
+            match test_descriptor {
+                Ok(test_descriptor) => {
+                    let test_id = test_descriptor.id;
+                    let result = carl.viper.store_viper_test_descriptor(test_descriptor).await;
                     match result {
                         Ok(_) => {
                             debug!("Successfully stored test: {test_id}");

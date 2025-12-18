@@ -1,7 +1,7 @@
 use tonic::{Request, Response, Status};
 use tracing::{error, trace};
 use opendut_carl_api::proto::services::test_manager::{delete_viper_source_descriptor_response, get_viper_source_descriptor_response, list_viper_source_descriptors_response, store_viper_source_descriptor_response, DeleteViperSourceDescriptorRequest, DeleteViperSourceDescriptorResponse, DeleteViperSourceDescriptorSuccess, GetViperSourceDescriptorRequest, GetViperSourceDescriptorResponse, GetViperSourceDescriptorSuccess, ListViperSourceDescriptorsRequest, ListViperSourceDescriptorsResponse, ListViperSourceDescriptorsSuccess, StoreViperSourceDescriptorRequest, StoreViperSourceDescriptorResponse, StoreViperSourceDescriptorSuccess};
-use opendut_carl_api::proto::services::test_manager::{delete_viper_run_descriptor_response, get_viper_run_descriptor_response, list_viper_run_descriptors_response, store_viper_run_descriptor_response, DeleteViperRunDescriptorRequest, DeleteViperRunDescriptorResponse, DeleteViperRunDescriptorSuccess, GetViperRunDescriptorRequest, GetViperRunDescriptorResponse, GetViperRunDescriptorSuccess, ListViperRunDescriptorsRequest, ListViperRunDescriptorsResponse, ListViperRunDescriptorsSuccess, StoreViperRunDescriptorRequest, StoreViperRunDescriptorResponse, StoreViperRunDescriptorSuccess};
+use opendut_carl_api::proto::services::test_manager::{delete_viper_test_descriptor_response, get_viper_test_descriptor_response, list_viper_test_descriptors_response, store_viper_test_descriptor_response, DeleteViperTestDescriptorRequest, DeleteViperTestDescriptorResponse, DeleteViperTestDescriptorSuccess, GetViperTestDescriptorRequest, GetViperTestDescriptorResponse, GetViperTestDescriptorSuccess, ListViperTestDescriptorsRequest, ListViperTestDescriptorsResponse, ListViperTestDescriptorsSuccess, StoreViperTestDescriptorRequest, StoreViperTestDescriptorResponse, StoreViperTestDescriptorSuccess};
 use opendut_carl_api::proto::services::test_manager::{delete_viper_run_deployment_response, get_viper_run_deployment_response, list_viper_run_deployments_response, store_viper_run_deployment_response, DeleteViperRunDeploymentRequest, DeleteViperRunDeploymentResponse, DeleteViperRunDeploymentSuccess, GetViperRunDeploymentRequest, GetViperRunDeploymentResponse, GetViperRunDeploymentSuccess, ListViperRunDeploymentsRequest, ListViperRunDeploymentsResponse, ListViperRunDeploymentsSuccess, StoreViperRunDeploymentRequest, StoreViperRunDeploymentResponse, StoreViperRunDeploymentSuccess};
 use opendut_carl_api::proto::services::test_manager::test_manager_server::{TestManager as TestManagerService, TestManagerServer};
 use opendut_model::viper::{ViperRunDeployment, ViperTestDescriptor, ViperTestId, ViperSourceDescriptor, ViperSourceId};
@@ -157,130 +157,130 @@ impl TestManagerService for TestManagerFacade {
 
 
     //
-    // ViperRunDescriptor
+    // ViperTestDescriptor
     //
 
     #[tracing::instrument(skip_all, level="trace")]
-    async fn store_viper_run_descriptor(&self, request: Request<StoreViperRunDescriptorRequest>) -> Result<Response<StoreViperRunDescriptorResponse>, Status> {
+    async fn store_viper_test_descriptor(&self, request: Request<StoreViperTestDescriptorRequest>) -> Result<Response<StoreViperTestDescriptorResponse>, Status> {
 
         let request = request.into_inner();
-        let run: ViperTestDescriptor = extract!(request.run)?;
+        let test: ViperTestDescriptor = extract!(request.test)?;
 
-        trace!("Received request to store test suite run descriptor: {run:?}");
+        trace!("Received request to store VIPER test descriptor: {test:?}");
 
 
         let result =
-            self.resource_manager.insert(run.id, run.clone()).await
+            self.resource_manager.insert(test.id, test.clone()).await
                 .log_api_err()
-                .map_err(|_: PersistenceError| opendut_carl_api::carl::viper::StoreViperRunDescriptorError::Internal {
-                    run_id: run.id,
-                    cause: String::from("Error when accessing persistence while storing test suite run descriptor"),
+                .map_err(|_: PersistenceError| opendut_carl_api::carl::viper::StoreViperTestDescriptorError::Internal {
+                    test_id: test.id,
+                    cause: String::from("Error when accessing persistence while storing VIPER test descriptor"),
                 });
 
         let reply = match result {
-            Ok(()) => store_viper_run_descriptor_response::Reply::Success(
-                StoreViperRunDescriptorSuccess {
-                    run_id: Some(run.id.into()),
+            Ok(()) => store_viper_test_descriptor_response::Reply::Success(
+                StoreViperTestDescriptorSuccess {
+                    test_id: Some(test.id.into()),
                 }
             ),
-            Err(error) => store_viper_run_descriptor_response::Reply::Failure(error.into()),
+            Err(error) => store_viper_test_descriptor_response::Reply::Failure(error.into()),
         };
 
-        Ok(Response::new(StoreViperRunDescriptorResponse {
+        Ok(Response::new(StoreViperTestDescriptorResponse {
             reply: Some(reply),
         }))
     }
 
     #[tracing::instrument(skip_all, level="trace")]
-    async fn delete_viper_run_descriptor(&self, request: Request<DeleteViperRunDescriptorRequest>) -> Result<Response<DeleteViperRunDescriptorResponse>, Status> {
+    async fn delete_viper_test_descriptor(&self, request: Request<DeleteViperTestDescriptorRequest>) -> Result<Response<DeleteViperTestDescriptorResponse>, Status> {
 
         let request = request.into_inner();
-        let run_id: ViperTestId = extract!(request.run_id)?;
+        let test_id: ViperTestId = extract!(request.test_id)?;
 
-        trace!("Received request to delete test suite run descriptor for run <{run_id}>.");
+        trace!("Received request to delete VIPER test descriptor <{test_id}>.");
 
         let result =
-            self.resource_manager.remove::<ViperTestDescriptor>(run_id).await
+            self.resource_manager.remove::<ViperTestDescriptor>(test_id).await
                 .log_api_err()
-                .map_err(|_: PersistenceError| opendut_carl_api::carl::viper::DeleteViperRunDescriptorError::Internal {
-                    run_id,
-                    cause: String::from("Error when accessing persistence while storing test suite run descriptor"),
+                .map_err(|_: PersistenceError| opendut_carl_api::carl::viper::DeleteViperTestDescriptorError::Internal {
+                    test_id,
+                    cause: String::from("Error when accessing persistence while storing VIPER test descriptor"),
                 });
 
         let response = match result {
-            Ok(_) => delete_viper_run_descriptor_response::Reply::Success(
-                DeleteViperRunDescriptorSuccess {
-                    run_id: Some(run_id.into())
+            Ok(_) => delete_viper_test_descriptor_response::Reply::Success(
+                DeleteViperTestDescriptorSuccess {
+                    test_id: Some(test_id.into())
                 }
             ),
-            Err(error) => delete_viper_run_descriptor_response::Reply::Failure(error.into()),
+            Err(error) => delete_viper_test_descriptor_response::Reply::Failure(error.into()),
         };
 
-        Ok(Response::new(DeleteViperRunDescriptorResponse {
+        Ok(Response::new(DeleteViperTestDescriptorResponse {
             reply: Some(response),
         }))
     }
 
     #[tracing::instrument(skip_all, level="trace")]
-    async fn get_viper_run_descriptor(&self, request: Request<GetViperRunDescriptorRequest>) -> Result<Response<GetViperRunDescriptorResponse>, Status> {
+    async fn get_viper_test_descriptor(&self, request: Request<GetViperTestDescriptorRequest>) -> Result<Response<GetViperTestDescriptorResponse>, Status> {
 
         let request = request.into_inner();
-        let run_id: ViperTestId = extract!(request.run_id)?;
+        let test_id: ViperTestId = extract!(request.test_id)?;
 
-        trace!("Received request to get test suite run descriptor for run <{run_id}>.");
+        trace!("Received request to get VIPER test descriptor <{test_id}>.");
 
         let result =
-            self.resource_manager.get::<ViperTestDescriptor>(run_id).await
-                .inspect_err(|error| error!("Error while getting test suite run descriptor from gRPC API: {error}"))
-                .map_err(|_: PersistenceError| opendut_carl_api::carl::viper::GetViperRunDescriptorError::Internal {
-                    run_id,
-                    cause: String::from("Error when accessing persistence while getting test suite run descriptor"),
+            self.resource_manager.get::<ViperTestDescriptor>(test_id).await
+                .inspect_err(|error| error!("Error while getting VIPER test descriptor from gRPC API: {error}"))
+                .map_err(|_: PersistenceError| opendut_carl_api::carl::viper::GetViperTestDescriptorError::Internal {
+                    test_id,
+                    cause: String::from("Error when accessing persistence while getting VIPER test descriptor"),
                 });
 
         let response = match result {
             Ok(descriptor) => match descriptor {
-                Some(descriptor) => get_viper_run_descriptor_response::Reply::Success(
-                    GetViperRunDescriptorSuccess {
+                Some(descriptor) => get_viper_test_descriptor_response::Reply::Success(
+                    GetViperTestDescriptorSuccess {
                         descriptor: Some(descriptor.into())
                     }
                 ),
-                None => get_viper_run_descriptor_response::Reply::Failure(
-                    opendut_carl_api::carl::viper::GetViperRunDescriptorError::RunNotFound { run_id }.into()
+                None => get_viper_test_descriptor_response::Reply::Failure(
+                    opendut_carl_api::carl::viper::GetViperTestDescriptorError::TestNotFound { test_id }.into()
                 ),
             }
-            Err(error) => get_viper_run_descriptor_response::Reply::Failure(error.into()),
+            Err(error) => get_viper_test_descriptor_response::Reply::Failure(error.into()),
         };
 
-        Ok(Response::new(GetViperRunDescriptorResponse {
+        Ok(Response::new(GetViperTestDescriptorResponse {
             reply: Some(response)
         }))
     }
 
     #[tracing::instrument(skip_all, level="trace")]
-    async fn list_viper_run_descriptors(&self, _: Request<ListViperRunDescriptorsRequest>) -> Result<Response<ListViperRunDescriptorsResponse>, Status> {
+    async fn list_viper_test_descriptors(&self, _: Request<ListViperTestDescriptorsRequest>) -> Result<Response<ListViperTestDescriptorsResponse>, Status> {
 
-        trace!("Received request to list test suite run descriptors.");
+        trace!("Received request to list VIPER test descriptors.");
 
         let result = self.resource_manager.list::<ViperTestDescriptor>().await
-            .inspect_err(|error| error!("Error while listing test suite run descriptors from gRPC API: {error}"))
-            .map_err(|_: PersistenceError| opendut_carl_api::carl::viper::ListViperRunDescriptorsError::Internal {
-                cause: String::from("Error when accessing persistence while listing test suite run descriptors"),
+            .inspect_err(|error| error!("Error while listing VIPER test descriptors from gRPC API: {error}"))
+            .map_err(|_: PersistenceError| opendut_carl_api::carl::viper::ListViperTestDescriptorsError::Internal {
+                cause: String::from("Error when accessing persistence while listing VIPER test descriptors"),
             });
 
         let response = match result {
-            Ok(runs) => {
-                let runs = runs.into_values()
+            Ok(tests) => {
+                let tests = tests.into_values()
                     .map(From::from)
                     .collect::<Vec<_>>();
 
-                list_viper_run_descriptors_response::Reply::Success(
-                    ListViperRunDescriptorsSuccess { runs }
+                list_viper_test_descriptors_response::Reply::Success(
+                    ListViperTestDescriptorsSuccess { tests }
                 )
             }
-            Err(error) => list_viper_run_descriptors_response::Reply::Failure(error.into())
+            Err(error) => list_viper_test_descriptors_response::Reply::Failure(error.into())
         };
 
-        Ok(Response::new(ListViperRunDescriptorsResponse {
+        Ok(Response::new(ListViperTestDescriptorsResponse {
             reply: Some(response)
         }))
     }
