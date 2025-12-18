@@ -47,11 +47,14 @@ If this prints an error, it is likely that you downloaded the wrong CPU architec
 If you want to use CAN, follow the steps in [CAN Setup](#can-setup) before continuing.
 If you do *not* want to use CAN, see [Setup without CAN](#setup-without-can) before continuing.
 
-### 5. Plugins
+### 5. mTLS Client Authentication
+If your backend requires mTLS Client Authentication, follow the steps in [mTLS Client Authentication](#mtls-client-authentication) before continuing.
+
+### 6. Plugins
 Depending on your target hardware, you might want to use plugins to perform additional setup steps.
 If so, follow the steps in [Plugins](#plugins) before continuing.
 
-### 6. Scripted Setup
+### 7. Scripted Setup
 EDGAR comes with a scripted setup, which you can initiate by running:  
 ```shell
 ./opendut-edgar setup managed
@@ -140,6 +143,26 @@ When you configured everything and deployed the cluster, you can test the CAN co
 
 If you want to setup an EDGAR without CAN support even after reading the above warning,
 you can pass `--skip-can-setup` on the EDGAR CLI while running the EDGAR Setup.
+
+
+## mTLS Client Authentication
+To configure EDGAR, so that it can connect to a backend that requires mTLS Client Authentication, run the following commands:
+```shell
+export OPENDUT_EDGAR_NETWORK_TLS_CLIENT_AUTH_ENABLED=true
+export OPENDUT_EDGAR_NETWORK_TLS_CLIENT_AUTH_CERTIFICATE="" #Path or certificate content
+export OPENDUT_EDGAR_NETWORK_TLS_CLIENT_AUTH_KEY="" #Path or key content
+export OPENDUT_EDGAR_NETWORK_OIDC_CLIENT_TLS_CLIENT_AUTH_ENABLED=true
+export OPENDUT_EDGAR_OPENTELEMETRY_TLS_CLIENT_AUTH_ENABLED=true
+```
+
+These values will be persisted into the EDGAR configuration file.
+
+Make sure the certificate and key files are accessible by the `opendut_service` user
+that will be created during the EDGAR Setup.
+
+If you need separate certificates and keys for OIDC or OpenTelemetry,
+you can additionally set the respective variables ending on `_CERTIFICATE` and `_KEY`.  
+Without setting these, the value from `OPENDUT_EDGAR_NETWORK_TLS_CLIENT_AUTH_{CERTIFICATE,KEY}` will be used.
 
 
 ## Plugins
