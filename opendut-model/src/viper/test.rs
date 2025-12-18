@@ -10,23 +10,23 @@ use super::ViperTestSuiteIdentifier;
 
 
 #[derive(Clone, Debug)]
-pub struct ViperRunDescriptor {
-    pub id: ViperRunId,
-    pub name: ViperRunName,
+pub struct ViperTestDescriptor {
+    pub id: ViperTestId,
+    pub name: ViperTestName,
     pub source: ViperSourceId,
     pub suite: ViperTestSuiteIdentifier,
     pub cluster: ClusterId,
-    pub parameters: HashMap<ViperRunParameterKey, ViperRunParameterValue>,
+    pub parameters: HashMap<ViperTestParameterKey, ViperTestParameterValue>,
 }
 
 
-create_id_type!(ViperRunId);
+create_id_type!(ViperTestId);
 
 
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
-pub struct ViperRunName(pub(crate) String);
+pub struct ViperTestName(pub(crate) String);
 
-impl ViperRunName {
+impl ViperTestName {
     pub const MIN_LENGTH: usize = 4;
     pub const MAX_LENGTH: usize = 64;
 
@@ -36,9 +36,9 @@ impl ViperRunName {
 }
 
 #[derive(thiserror::Error, Clone, Debug)]
-pub enum IllegalViperRunName {
+pub enum IllegalViperTestName {
     #[error(
-        "VIPER run name '{value}' is too short. Expected at least {expected} characters, got {actual}."
+        "VIPER test name '{value}' is too short. Expected at least {expected} characters, got {actual}."
     )]
     TooShort {
         value: String,
@@ -46,53 +46,53 @@ pub enum IllegalViperRunName {
         actual: usize,
     },
     #[error(
-        "VIPER run name '{value}' is too long. Expected at most {expected} characters, got {actual}."
+        "VIPER test name '{value}' is too long. Expected at most {expected} characters, got {actual}."
     )]
     TooLong {
         value: String,
         expected: usize,
         actual: usize,
     },
-    #[error("VIPER run name '{value}' contains invalid characters.")]
+    #[error("VIPER test name '{value}' contains invalid characters.")]
     InvalidCharacter { value: String },
-    #[error("VIPER run name '{value}' contains invalid start or end characters.")]
+    #[error("VIPER test name '{value}' contains invalid start or end characters.")]
     InvalidStartEndCharacter { value: String },
 }
 
-impl From<ViperRunName> for String {
-    fn from(value: ViperRunName) -> Self {
+impl From<ViperTestName> for String {
+    fn from(value: ViperTestName) -> Self {
         value.0
     }
 }
 
-impl TryFrom<String> for ViperRunName {
-    type Error = IllegalViperRunName;
+impl TryFrom<String> for ViperTestName {
+    type Error = IllegalViperTestName;
 
     fn try_from(value: String) -> Result<Self, Self::Error> {
         let length = value.len();
 
         if length < Self::MIN_LENGTH {
-            Err(IllegalViperRunName::TooShort {
+            Err(IllegalViperTestName::TooShort {
                 value,
                 expected: Self::MIN_LENGTH,
                 actual: length,
             })
         }
         else if length > Self::MAX_LENGTH {
-            Err(IllegalViperRunName::TooLong {
+            Err(IllegalViperTestName::TooLong {
                 value,
                 expected: Self::MAX_LENGTH,
                 actual: length,
             })
         }
         else if crate::util::invalid_start_and_end_of_a_name(&value) {
-            Err(IllegalViperRunName::InvalidStartEndCharacter { value })
+            Err(IllegalViperTestName::InvalidStartEndCharacter { value })
         }
         else if value
             .chars()
             .any(|character| crate::util::valid_characters_in_name(&character).not())
         {
-            Err(IllegalViperRunName::InvalidCharacter { value })
+            Err(IllegalViperTestName::InvalidCharacter { value })
         }
         else {
             Ok(Self(value))
@@ -100,22 +100,22 @@ impl TryFrom<String> for ViperRunName {
     }
 }
 
-impl TryFrom<&str> for ViperRunName {
-    type Error = IllegalViperRunName;
+impl TryFrom<&str> for ViperTestName {
+    type Error = IllegalViperTestName;
 
     fn try_from(value: &str) -> Result<Self, Self::Error> {
-        ViperRunName::try_from(value.to_owned())
+        ViperTestName::try_from(value.to_owned())
     }
 }
 
-impl fmt::Display for ViperRunName {
+impl fmt::Display for ViperTestName {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", self.0)
     }
 }
 
-impl FromStr for ViperRunName {
-    type Err = IllegalViperRunName;
+impl FromStr for ViperTestName {
+    type Err = IllegalViperTestName;
 
     fn from_str(value: &str) -> Result<Self, Self::Err> {
         Self::try_from(value)
@@ -124,10 +124,10 @@ impl FromStr for ViperRunName {
 
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
-pub struct ViperRunParameterKey { pub inner: String }
+pub struct ViperTestParameterKey { pub inner: String }
 
 #[derive(Clone, Debug)]
-pub enum ViperRunParameterValue {
+pub enum ViperTestParameterValue {
     Boolean(bool),
     Number(i64),
     Text(String),

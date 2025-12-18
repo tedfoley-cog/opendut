@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use opendut_util::conversion;
 use opendut_util::proto::ConversionResult;
-use crate::viper::ViperRunParameterKey;
+use crate::viper::ViperTestParameterKey;
 
 opendut_util::include_proto!("opendut.model.viper");
 
@@ -71,17 +71,17 @@ conversion! {
 
 
 //
-// ViperRun
+// ViperTest
 //
 
 conversion! {
-    type Model = crate::viper::ViperRunDescriptor;
-    type Proto = ViperRunDescriptor;
+    type Model = crate::viper::ViperTestDescriptor;
+    type Proto = ViperTestDescriptor;
 
     fn from(value: Model) -> Proto {
         let parameters = value.parameters.into_iter()
             .map(|(key, value)| {
-                ViperRunParameter {
+                ViperTestParameter {
                     key: key.inner,
                     value: Some(value.into())
                 }
@@ -116,7 +116,7 @@ conversion! {
 
         let parameters = value.parameters.into_iter()
             .map(|parameter| {
-                let key = ViperRunParameterKey { inner: parameter.key };
+                let key = ViperTestParameterKey { inner: parameter.key };
                 let value = extract!(parameter.value)?.try_into()?;
 
                 Ok((key, value))
@@ -128,8 +128,8 @@ conversion! {
 }
 
 conversion! {
-    type Model = crate::viper::ViperRunId;
-    type Proto = ViperRunId;
+    type Model = crate::viper::ViperTestId;
+    type Proto = ViperTestId;
 
     fn from(value: Model) -> Proto {
         Proto {
@@ -144,8 +144,8 @@ conversion! {
 }
 
 conversion! {
-    type Model = crate::viper::ViperRunName;
-    type Proto = ViperRunName;
+    type Model = crate::viper::ViperTestName;
+    type Proto = ViperTestName;
 
     fn from(value: Model) -> Proto {
         Proto {
@@ -160,23 +160,23 @@ conversion! {
 }
 
 conversion! {
-    type Model = crate::viper::ViperRunParameterValue;
-    type Proto = ViperRunParameterValue;
+    type Model = crate::viper::ViperTestParameterValue;
+    type Proto = ViperTestParameterValue;
 
     fn from(value: Model) -> Proto {
         let value = match value {
-            Model::Boolean(value) => viper_run_parameter_value::Kind::Boolean(value),
-            Model::Number(value) => viper_run_parameter_value::Kind::Number(value),
-            Model::Text(value) => viper_run_parameter_value::Kind::Text(value),
+            Model::Boolean(value) => viper_test_parameter_value::Kind::Boolean(value),
+            Model::Number(value) => viper_test_parameter_value::Kind::Number(value),
+            Model::Text(value) => viper_test_parameter_value::Kind::Text(value),
         };
         Proto { kind: Some(value) }
     }
 
     fn try_from(value: Proto) -> ConversionResult<Model> {
         let value = match extract!(value.kind)? {
-            viper_run_parameter_value::Kind::Boolean(value) => Model::Boolean(value),
-            viper_run_parameter_value::Kind::Number(value) => Model::Number(value),
-            viper_run_parameter_value::Kind::Text(value) => Model::Text(value),
+            viper_test_parameter_value::Kind::Boolean(value) => Model::Boolean(value),
+            viper_test_parameter_value::Kind::Number(value) => Model::Number(value),
+            viper_test_parameter_value::Kind::Text(value) => Model::Text(value),
         };
         Ok(value)
     }

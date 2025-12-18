@@ -4,7 +4,7 @@ package opendut.carl.services.test_manager;
 
 import "opendut/model/cluster/cluster.proto";
 import "opendut/model/viper/deployment.proto";
-import "opendut/model/viper/run.proto";
+import "opendut/model/viper/test.proto";
 import "opendut/model/viper/source.proto";
 
 service TestManager {
@@ -173,7 +173,7 @@ message ListViperSourceDescriptorsFailureInternal {
 // StoreViperRunDescriptorRequest
 //
 message StoreViperRunDescriptorRequest {
-  opendut.model.viper.ViperRunDescriptor run = 1;
+  opendut.model.viper.ViperTestDescriptor run = 1;
 }
 
 message StoreViperRunDescriptorResponse {
@@ -184,7 +184,7 @@ message StoreViperRunDescriptorResponse {
 }
 
 message StoreViperRunDescriptorSuccess {
-  opendut.model.viper.ViperRunId run_id = 1;
+  opendut.model.viper.ViperTestId run_id = 1;
 }
 
 message StoreViperRunDescriptorFailure {
@@ -194,7 +194,7 @@ message StoreViperRunDescriptorFailure {
 }
 
 message StoreViperRunDescriptorFailureInternal {
-  opendut.model.viper.ViperRunId run_id = 1;
+  opendut.model.viper.ViperTestId run_id = 1;
   string cause = 2;
 }
 
@@ -203,7 +203,7 @@ message StoreViperRunDescriptorFailureInternal {
 // DeleteViperRunDescriptorRequest
 //
 message DeleteViperRunDescriptorRequest {
-  opendut.model.viper.ViperRunId run_id = 1;
+  opendut.model.viper.ViperTestId run_id = 1;
 }
 
 message DeleteViperRunDescriptorResponse {
@@ -214,7 +214,7 @@ message DeleteViperRunDescriptorResponse {
 }
 
 message DeleteViperRunDescriptorSuccess {
-  opendut.model.viper.ViperRunId run_id = 1;
+  opendut.model.viper.ViperTestId run_id = 1;
 }
 
 message DeleteViperRunDescriptorFailure {
@@ -226,16 +226,16 @@ message DeleteViperRunDescriptorFailure {
 }
 
 message DeleteViperRunDescriptorFailureRunNotFound {
-  opendut.model.viper.ViperRunId run_id = 1;
+  opendut.model.viper.ViperTestId run_id = 1;
 }
 
 message DeleteViperRunDescriptorFailureInternal {
-  opendut.model.viper.ViperRunId run_id = 1;
+  opendut.model.viper.ViperTestId run_id = 1;
   string cause = 2;
 }
 
 message DeleteViperRunDescriptorFailureDeploymentExists {
-  opendut.model.viper.ViperRunId run_id = 1;
+  opendut.model.viper.ViperTestId run_id = 1;
   opendut.model.cluster.ClusterId cluster_id = 2;
 }
 
@@ -244,7 +244,7 @@ message DeleteViperRunDescriptorFailureDeploymentExists {
 // GetViperRunDescriptorRequest
 //
 message GetViperRunDescriptorRequest {
-  opendut.model.viper.ViperRunId run_id = 1;
+  opendut.model.viper.ViperTestId run_id = 1;
 }
 
 message GetViperRunDescriptorResponse {
@@ -255,7 +255,7 @@ message GetViperRunDescriptorResponse {
 }
 
 message GetViperRunDescriptorSuccess {
-  opendut.model.viper.ViperRunDescriptor descriptor = 1;
+  opendut.model.viper.ViperTestDescriptor descriptor = 1;
 }
 
 message GetViperRunDescriptorFailure {
@@ -266,11 +266,11 @@ message GetViperRunDescriptorFailure {
 }
 
 message GetViperRunDescriptorFailureRunNotFound {
-  opendut.model.viper.ViperRunId run_id = 1;
+  opendut.model.viper.ViperTestId run_id = 1;
 }
 
 message GetViperRunDescriptorFailureInternal {
-  opendut.model.viper.ViperRunId run_id = 1;
+  opendut.model.viper.ViperTestId run_id = 1;
   string cause = 2;
 }
 
@@ -288,7 +288,7 @@ message ListViperRunDescriptorsResponse {
 }
 
 message ListViperRunDescriptorsSuccess {
-  repeated opendut.model.viper.ViperRunDescriptor runs = 1;
+  repeated opendut.model.viper.ViperTestDescriptor runs = 1;
 }
 
 message ListViperRunDescriptorsFailure {
@@ -321,7 +321,7 @@ message StoreViperRunDeploymentResponse {
 }
 
 message StoreViperRunDeploymentSuccess {
-  opendut.model.viper.ViperRunId run_id = 1;
+  opendut.model.viper.ViperTestId run_id = 1;
 }
 
 message StoreViperRunDeploymentFailure {
@@ -331,7 +331,7 @@ message StoreViperRunDeploymentFailure {
 }
 
 message StoreViperRunDeploymentFailureInternal {
-  opendut.model.viper.ViperRunId run_id = 1;
+  opendut.model.viper.ViperTestId run_id = 1;
   string cause = 2;
 }
 
@@ -340,7 +340,7 @@ message StoreViperRunDeploymentFailureInternal {
 // DeleteViperRunDeploymentRequest
 //
 message DeleteViperRunDeploymentRequest {
-  opendut.model.viper.ViperRunId run_id = 1;
+  opendut.model.viper.ViperTestId run_id = 1;
 }
 
 message DeleteViperRunDeploymentResponse {
@@ -351,7 +351,7 @@ message DeleteViperRunDeploymentResponse {
 }
 
 message DeleteViperRunDeploymentSuccess {
-  opendut.model.viper.ViperRunId run_id = 1;
+  opendut.model.viper.ViperTestId run_id = 1;
 }
 
 message DeleteViperRunDeploymentFailure {
@@ -362,11 +362,11 @@ message DeleteViperRunDeploymentFailure {
 }
 
 message DeleteViperRunDeploymentFailureRunNotFound {
-  opendut.model.viper.ViperRunId run_id = 1;
+  opendut.model.viper.ViperTestId run_id = 1;
 }
 
 message DeleteViperRunDeploymentFailureInternal {
-  opendut.model.viper.ViperRunId run_id = 1;
+  opendut.model.viper.ViperTestId run_id = 1;
   string cause = 2;
 }
 
@@ -375,7 +375,7 @@ message DeleteViperRunDeploymentFailureInternal {
 // GetViperRunDeploymentRequest
 //
 message GetViperRunDeploymentRequest {
-  opendut.model.viper.ViperRunId run_id = 1;
+  opendut.model.viper.ViperTestId run_id = 1;
 }
 
 message GetViperRunDeploymentResponse {
@@ -397,11 +397,11 @@ message GetViperRunDeploymentFailure {
 }
 
 message GetViperRunDeploymentFailureRunNotFound {
-  opendut.model.viper.ViperRunId run_id = 1;
+  opendut.model.viper.ViperTestId run_id = 1;
 }
 
 message GetViperRunDeploymentFailureInternal {
-  opendut.model.viper.ViperRunId run_id = 1;
+  opendut.model.viper.ViperTestId run_id = 1;
   string cause = 2;
 }
 

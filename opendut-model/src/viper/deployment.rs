@@ -1,7 +1,7 @@
-use crate::viper::ViperRunId;
+use crate::viper::ViperTestId;
 
 
 #[derive(Clone, Debug)]
 pub struct ViperRunDeployment {
-    pub id: ViperRunId,
+    pub id: ViperTestId,
 }

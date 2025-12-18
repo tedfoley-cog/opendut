@@ -4,7 +4,7 @@ use opendut_carl_api::proto::services::test_manager::{delete_viper_source_descri
 use opendut_carl_api::proto::services::test_manager::{delete_viper_run_descriptor_response, get_viper_run_descriptor_response, list_viper_run_descriptors_response, store_viper_run_descriptor_response, DeleteViperRunDescriptorRequest, DeleteViperRunDescriptorResponse, DeleteViperRunDescriptorSuccess, GetViperRunDescriptorRequest, GetViperRunDescriptorResponse, GetViperRunDescriptorSuccess, ListViperRunDescriptorsRequest, ListViperRunDescriptorsResponse, ListViperRunDescriptorsSuccess, StoreViperRunDescriptorRequest, StoreViperRunDescriptorResponse, StoreViperRunDescriptorSuccess};
 use opendut_carl_api::proto::services::test_manager::{delete_viper_run_deployment_response, get_viper_run_deployment_response, list_viper_run_deployments_response, store_viper_run_deployment_response, DeleteViperRunDeploymentRequest, DeleteViperRunDeploymentResponse, DeleteViperRunDeploymentSuccess, GetViperRunDeploymentRequest, GetViperRunDeploymentResponse, GetViperRunDeploymentSuccess, ListViperRunDeploymentsRequest, ListViperRunDeploymentsResponse, ListViperRunDeploymentsSuccess, StoreViperRunDeploymentRequest, StoreViperRunDeploymentResponse, StoreViperRunDeploymentSuccess};
 use opendut_carl_api::proto::services::test_manager::test_manager_server::{TestManager as TestManagerService, TestManagerServer};
-use opendut_model::viper::{ViperRunDeployment, ViperRunDescriptor, ViperRunId, ViperSourceDescriptor, ViperSourceId};
+use opendut_model::viper::{ViperRunDeployment, ViperTestDescriptor, ViperTestId, ViperSourceDescriptor, ViperSourceId};
 use crate::manager::grpc::error::LogApiErr;
 use crate::manager::grpc::extract;
 use crate::resource::manager::ResourceManagerRef;
@@ -164,7 +164,7 @@ impl TestManagerService for TestManagerFacade {
     async fn store_viper_run_descriptor(&self, request: Request<StoreViperRunDescriptorRequest>) -> Result<Response<StoreViperRunDescriptorResponse>, Status> {
 
         let request = request.into_inner();
-        let run: ViperRunDescriptor = extract!(request.run)?;
+        let run: ViperTestDescriptor = extract!(request.run)?;
 
         trace!("Received request to store test suite run descriptor: {run:?}");
 
@@ -195,12 +195,12 @@ impl TestManagerService for TestManagerFacade {
     async fn delete_viper_run_descriptor(&self, request: Request<DeleteViperRunDescriptorRequest>) -> Result<Response<DeleteViperRunDescriptorResponse>, Status> {
 
         let request = request.into_inner();
-        let run_id: ViperRunId = extract!(request.run_id)?;
+        let run_id: ViperTestId = extract!(request.run_id)?;
 
         trace!("Received request to delete test suite run descriptor for run <{run_id}>.");
 
         let result =
-            self.resource_manager.remove::<ViperRunDescriptor>(run_id).await
+            self.resource_manager.remove::<ViperTestDescriptor>(run_id).await
                 .log_api_err()
                 .map_err(|_: PersistenceError| opendut_carl_api::carl::viper::DeleteViperRunDescriptorError::Internal {
                     run_id,
@@ -225,12 +225,12 @@ impl TestManagerService for TestManagerFacade {
     async fn get_viper_run_descriptor(&self, request: Request<GetViperRunDescriptorRequest>) -> Result<Response<GetViperRunDescriptorResponse>, Status> {
 
         let request = request.into_inner();
-        let run_id: ViperRunId = extract!(request.run_id)?;
+        let run_id: ViperTestId = extract!(request.run_id)?;
 
         trace!("Received request to get test suite run descriptor for run <{run_id}>.");
 
         let result =
-            self.resource_manager.get::<ViperRunDescriptor>(run_id).await
+            self.resource_manager.get::<ViperTestDescriptor>(run_id).await
                 .inspect_err(|error| error!("Error while getting test suite run descriptor from gRPC API: {error}"))
                 .map_err(|_: PersistenceError| opendut_carl_api::carl::viper::GetViperRunDescriptorError::Internal {
                     run_id,
@@ -261,7 +261,7 @@ impl TestManagerService for TestManagerFacade {
 
         trace!("Received request to list test suite run descriptors.");
 
-        let result = self.resource_manager.list::<ViperRunDescriptor>().await
+        let result = self.resource_manager.list::<ViperTestDescriptor>().await
             .inspect_err(|error| error!("Error while listing test suite run descriptors from gRPC API: {error}"))
             .map_err(|_: PersistenceError| opendut_carl_api::carl::viper::ListViperRunDescriptorsError::Internal {
                 cause: String::from("Error when accessing persistence while listing test suite run descriptors"),
@@ -325,7 +325,7 @@ impl TestManagerService for TestManagerFacade {
     async fn delete_viper_run_deployment(&self, request: Request<DeleteViperRunDeploymentRequest>) -> Result<Response<DeleteViperRunDeploymentResponse>, Status> {
 
         let request = request.into_inner();
-        let run_id: ViperRunId = extract!(request.run_id)?;
+        let run_id: ViperTestId = extract!(request.run_id)?;
 
         trace!("Received request to delete test suite run deployment for run <{run_id}>.");
 
@@ -355,7 +355,7 @@ impl TestManagerService for TestManagerFacade {
     async fn get_viper_run_deployment(&self, request: Request<GetViperRunDeploymentRequest>) -> Result<Response<GetViperRunDeploymentResponse>, Status> {
 
         let request = request.into_inner();
-        let run_id: ViperRunId = extract!(request.run_id)?;
+        let run_id: ViperTestId = extract!(request.run_id)?;
 
         trace!("Received request to get test suite run deployment for run <{run_id}>.");
 

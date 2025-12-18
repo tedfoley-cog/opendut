@@ -6,7 +6,7 @@ use opendut_model::peer::PeerDescriptor;
 use tokio::sync::broadcast;
 
 #[cfg(feature = "viper")]
-use opendut_model::viper::{ViperRunDeployment, ViperRunDescriptor, ViperSourceDescriptor};
+use opendut_model::viper::{ViperRunDeployment, ViperTestDescriptor, ViperSourceDescriptor};
 
 pub struct Subscription<R: Resource> {
     receiver: broadcast::Receiver<SubscriptionEvent<R>>,
@@ -62,11 +62,11 @@ impl_subscribable!(PeerDescriptor, peer_descriptor);
 impl_subscribable!(PeerConnectionState, peer_connection_state);
 impl_subscribable!(EdgePeerConfigurationState, peer_configuration_state);
 #[cfg(feature = "viper")]
-impl_subscribable!(ViperSourceDescriptor, test_suite_source_descriptor);
+impl_subscribable!(ViperSourceDescriptor, viper_source_descriptor);
 #[cfg(feature = "viper")]
-impl_subscribable!(ViperRunDescriptor, test_suite_run_descriptor);
+impl_subscribable!(ViperTestDescriptor, viper_test_descriptor);
 #[cfg(feature = "viper")]
-impl_subscribable!(ViperRunDeployment, test_suite_run_deployment);
+impl_subscribable!(ViperRunDeployment, viper_run_deployment);
 
 pub type ResourceSubscriptionChannel<R> = (broadcast::Sender<SubscriptionEvent<R>>, broadcast::Receiver<SubscriptionEvent<R>>); //store both the sender and initial receiver, to prevent channel from closing
 
@@ -77,9 +77,9 @@ pub struct ResourceSubscriptionChannels {
     pub peer_descriptor: ResourceSubscriptionChannel<PeerDescriptor>,
     pub peer_connection_state: ResourceSubscriptionChannel<PeerConnectionState>,
     pub peer_configuration_state: ResourceSubscriptionChannel<EdgePeerConfigurationState>,
-    #[cfg(feature = "viper")] pub test_suite_source_descriptor: ResourceSubscriptionChannel<ViperSourceDescriptor>,
-    #[cfg(feature = "viper")] pub test_suite_run_descriptor: ResourceSubscriptionChannel<ViperRunDescriptor>,
-    #[cfg(feature = "viper")] pub test_suite_run_deployment: ResourceSubscriptionChannel<ViperRunDeployment>,
+    #[cfg(feature = "viper")] pub viper_source_descriptor: ResourceSubscriptionChannel<ViperSourceDescriptor>,
+    #[cfg(feature = "viper")] pub viper_test_descriptor: ResourceSubscriptionChannel<ViperTestDescriptor>,
+    #[cfg(feature = "viper")] pub viper_run_deployment: ResourceSubscriptionChannel<ViperRunDeployment>,
 }
 impl ResourceSubscriptionChannels {
     pub fn subscribe<R: Resource + Subscribable>(&mut self) -> Subscription<R> {
@@ -102,9 +102,9 @@ impl ResourceSubscriptionChannels {
             peer_descriptor,
             peer_connection_state,
             peer_configuration_state,
-            #[cfg(feature = "viper")] test_suite_source_descriptor,
-            #[cfg(feature = "viper")] test_suite_run_descriptor,
-            #[cfg(feature = "viper")] test_suite_run_deployment,
+            #[cfg(feature = "viper")] viper_source_descriptor,
+            #[cfg(feature = "viper")] viper_test_descriptor,
+            #[cfg(feature = "viper")] viper_run_deployment,
         } = self;
 
         let result =
@@ -117,9 +117,9 @@ impl ResourceSubscriptionChannels {
 
         #[cfg(feature = "viper")]
         let result = result
-            && test_suite_source_descriptor.0.is_empty()
-            && test_suite_run_descriptor.0.is_empty()
-            && test_suite_run_deployment.0.is_empty();
+            && viper_source_descriptor.0.is_empty()
+            && viper_test_descriptor.0.is_empty()
+            && viper_run_deployment.0.is_empty();
 
         result
     }
@@ -135,9 +135,9 @@ impl Default for ResourceSubscriptionChannels {
             peer_descriptor: broadcast::channel(capacity),
             peer_connection_state: broadcast::channel(capacity),
             peer_configuration_state: broadcast::channel(capacity),
-            #[cfg(feature = "viper")] test_suite_source_descriptor: broadcast::channel(capacity),
-            #[cfg(feature = "viper")] test_suite_run_descriptor: broadcast::channel(capacity),
-            #[cfg(feature = "viper")] test_suite_run_deployment: broadcast::channel(capacity),
+            #[cfg(feature = "viper")] viper_source_descriptor: broadcast::channel(capacity),
+            #[cfg(feature = "viper")] viper_test_descriptor: broadcast::channel(capacity),
+            #[cfg(feature = "viper")] viper_run_deployment: broadcast::channel(capacity),
         }
     }
 }

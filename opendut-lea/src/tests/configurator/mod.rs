@@ -3,7 +3,7 @@ use leptos::prelude::*;
 use leptos_router::hooks::{use_navigate, use_params_map};
 use opendut_lea_components::{BasePageContainer, Breadcrumb, LoadingSpinner, UserInputError, UserInputValue};
 use opendut_lea_components::tabs::{Tab, Tabs};
-use opendut_model::viper::{ViperRunDescriptor, ViperRunId, ViperRunParameterValue};
+use opendut_model::viper::{ViperTestDescriptor, ViperTestId, ViperTestParameterValue};
 use crate::app::use_app_globals;
 use crate::components::use_active_tab;
 use crate::routing::{navigate_to, WellKnownRoutes};
@@ -24,7 +24,7 @@ pub fn TestConfigurator() -> impl IntoView {
     let (test_configuration, test_configuration_resource, is_valid_test_configuration) = {
         let test_id = {
             let test_id = params.with_untracked(|params| {
-                params.get("id").and_then(|id| ViperRunId::try_from(id.as_str()).ok())
+                params.get("id").and_then(|id| ViperTestId::try_from(id.as_str()).ok())
             });
             match test_id {
                 None => {
@@ -34,7 +34,7 @@ pub fn TestConfigurator() -> impl IntoView {
                         text: String::from("Could not parse the provided value as TestId!"),
                         details: None,
                     }, use_navigate);
-                    ViperRunId::random()
+                    ViperTestId::random()
                 }
                 Some(test_id) => {
                     test_id
@@ -59,7 +59,7 @@ pub fn TestConfigurator() -> impl IntoView {
             async move {
                 if let Ok(configuration) = carl.viper.get_viper_run_descriptor(test_id).await {
                     test_configuration.update(|user_configuration| {
-                        let ViperRunDescriptor { id: _, name, source, suite, cluster, parameters } = configuration;
+                        let ViperTestDescriptor { id: _, name, source, suite, cluster, parameters } = configuration;
 
                         user_configuration.name = UserInputValue::Right(name.value().to_string());
                         user_configuration.source = UserInputValue::Right(source.to_string());
@@ -71,9 +71,9 @@ pub fn TestConfigurator() -> impl IntoView {
                         for (key, value) in parameters { //TODO this loop doesn't do anything?
 
                             let value = match value {
-                                ViperRunParameterValue::Boolean(boolean) => boolean.to_string(),
-                                ViperRunParameterValue::Number(number) => number.to_string(),
-                                ViperRunParameterValue::Text(text) => text,
+                                ViperTestParameterValue::Boolean(boolean) => boolean.to_string(),
+                                ViperTestParameterValue::Number(number) => number.to_string(),
+                                ViperTestParameterValue::Text(text) => text,
                             };
                             configured_parameters.insert(
                                 key.inner,

@@ -1,7 +1,7 @@
 use leptos::prelude::*;
 
 use leptos_router::hooks::use_navigate;
-use opendut_model::viper::ViperRunId;
+use opendut_model::viper::ViperTestId;
 use crate::components::{ButtonColor, ButtonSize, ButtonState, FontAwesomeIcon, IconButton};
 use crate::routing::{navigate_to, WellKnownRoutes};
 
@@ -19,7 +19,7 @@ pub fn CreateTestButton() -> impl IntoView {
             label="Create test"
             on_action=move || {
                 navigate_to(WellKnownRoutes::TestConfigurator {
-                    id: ViperRunId::random()
+                    id: ViperTestId::random()
                 }, use_navigate.clone());
             }
         />

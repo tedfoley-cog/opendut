@@ -8,29 +8,29 @@ import "opendut/viper/rt/test_suite.proto";
 import "opendut/model/cluster/cluster.proto";
 
 
-message ViperRunDescriptor {
-  ViperRunId id = 1;
-  ViperRunName name = 2;
+message ViperTestDescriptor {
+  ViperTestId id = 1;
+  ViperTestName name = 2;
   opendut.model.viper.ViperSourceId source = 3;
   opendut.viper.rt.test_suite.ViperTestSuiteIdentifier suite = 4;
   opendut.model.cluster.ClusterId cluster = 5;
-  repeated ViperRunParameter parameters = 6;
+  repeated ViperTestParameter parameters = 6;
 }
 
-message ViperRunId {
+message ViperTestId {
   opendut.model.util.Uuid uuid = 1;
 }
 
-message ViperRunName {
+message ViperTestName {
   string value = 1;
 }
 
-message ViperRunParameter {
+message ViperTestParameter {
   string key = 1;
-  ViperRunParameterValue value = 2;
+  ViperTestParameterValue value = 2;
 }
 
-message ViperRunParameterValue {
+message ViperTestParameterValue {
   oneof kind {
     bool boolean = 1;
     int64 number = 2;

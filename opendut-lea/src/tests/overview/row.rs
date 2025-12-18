@@ -2,13 +2,13 @@ use leptos::html::Div;
 use leptos::prelude::*;
 use leptos_use::on_click_outside;
 use opendut_lea_components::ButtonColor;
-use opendut_model::viper::ViperRunDescriptor;
+use opendut_model::viper::ViperTestDescriptor;
 use crate::app::use_app_globals;
 use crate::tests::components::DeleteTestButton;
 
 #[component]
 pub(crate) fn Row<OnDeleteFn>(
-    test_descriptor: RwSignal<ViperRunDescriptor>,
+    test_descriptor: RwSignal<ViperTestDescriptor>,
     on_delete: OnDeleteFn,
 ) -> impl IntoView
 where OnDeleteFn: Fn() + Copy + Send + 'static, {

@@ -1,6 +1,6 @@
 use leptos::prelude::*;
 
-use opendut_model::viper::{IllegalViperRunName, ViperRunName};
+use opendut_model::viper::{IllegalViperTestName, ViperTestName};
 use crate::components::{UserInput, UserInputValue};
 use crate::tests::configurator::types::UserTestConfiguration;
 
@@ -17,13 +17,13 @@ pub fn TestNameInput(test_configuration: RwSignal<UserTestConfiguration>) -> imp
     );
 
     let validator = |input: String| {
-        match ViperRunName::try_from(input.clone()) {
+        match ViperTestName::try_from(input.clone()) {
             Ok(_) => {
                 UserInputValue::Right(input)
             }
             Err(cause) => {
                 match cause {
-                    IllegalViperRunName::TooShort { expected, actual, value } => {
+                    IllegalViperTestName::TooShort { expected, actual, value } => {
                         if actual > 0 {
                             UserInputValue::Both(format!("A test name must be at least {expected} characters long."), value)
                         }
@@ -31,14 +31,14 @@ pub fn TestNameInput(test_configuration: RwSignal<UserTestConfiguration>) -> imp
                             UserInputValue::Both("Enter a valid test name.".to_string(), value)
                         }
                     }
-                    IllegalViperRunName::TooLong { expected, value, .. } => {
+                    IllegalViperTestName::TooLong { expected, value, .. } => {
                         UserInputValue::Both(format!("A test name must be at most {expected} characters long."), value)
                     },
-                    IllegalViperRunName::InvalidStartEndCharacter { value } => {
+                    IllegalViperTestName::InvalidStartEndCharacter { value } => {
                         UserInputValue::Both("The test name starts/ends with an invalid character. \
                         Valid characters are a-z, A-Z and 0-9.".to_string(), value)
                     }
-                    IllegalViperRunName::InvalidCharacter { value } => {
+                    IllegalViperTestName::InvalidCharacter { value } => {
                         UserInputValue::Both("The test name contains invalid characters.".to_string(), value)
                     },
                 }

@@ -1,12 +1,12 @@
 use leptos::prelude::*;
 use tracing::{error, info};
 use opendut_lea_components::{use_toaster, ButtonColor, ButtonSize, ButtonState, ConfirmationButton, FontAwesomeIcon, Toast};
-use opendut_model::viper::ViperRunId;
+use opendut_model::viper::ViperTestId;
 use crate::app::use_app_globals;
 
 #[component]
 pub fn DeleteTestButton<F>(
-    test_id: Signal<ViperRunId>,
+    test_id: Signal<ViperTestId>,
     #[prop(into)] button_color: Signal<ButtonColor>,
     on_delete: F
 ) -> impl IntoView

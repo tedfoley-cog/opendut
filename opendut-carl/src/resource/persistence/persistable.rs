@@ -10,7 +10,7 @@ use prost::Message;
 use std::fmt::Debug;
 
 #[cfg(feature = "viper")]
-use opendut_model::viper::{ViperRunDeployment, ViperRunDescriptor, ViperSourceDescriptor};
+use opendut_model::viper::{ViperRunDeployment, ViperTestDescriptor, ViperSourceDescriptor};
 
 impl Persistable for ClusterDeployment {
     type Proto = opendut_model::proto::cluster::ClusterDeployment;
@@ -59,21 +59,21 @@ impl Persistable for EdgePeerConfigurationState {
 #[cfg(feature = "viper")]
 impl Persistable for ViperSourceDescriptor {
     type Proto = opendut_model::proto::viper::ViperSourceDescriptor;
-    const TABLE: &'static str = "test_suite_source_descriptor";
+    const TABLE: &'static str = "viper_source_descriptor";
     const STORAGE: StorageKind = StorageKind::Persistent;
 }
 
 #[cfg(feature = "viper")]
-impl Persistable for ViperRunDescriptor {
-    type Proto = opendut_model::proto::viper::ViperRunDescriptor;
-    const TABLE: &'static str = "test_suite_run_descriptor";
+impl Persistable for ViperTestDescriptor {
+    type Proto = opendut_model::proto::viper::ViperTestDescriptor;
+    const TABLE: &'static str = "viper_test_descriptor";
     const STORAGE: StorageKind = StorageKind::Persistent;
 }
 
 #[cfg(feature = "viper")]
 impl Persistable for ViperRunDeployment {
     type Proto = opendut_model::proto::viper::ViperRunDeployment;
-    const TABLE: &'static str = "test_suite_run_deployment";
+    const TABLE: &'static str = "viper_run_deployment";
     const STORAGE: StorageKind = StorageKind::Persistent;
 }
 

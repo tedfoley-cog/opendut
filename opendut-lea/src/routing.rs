@@ -41,7 +41,7 @@ pub enum WellKnownRoutes {
     #[cfg(feature = "viper")]
     TestsOverview,
     #[cfg(feature = "viper")]
-    TestConfigurator { id: opendut_model::viper::ViperRunId },
+    TestConfigurator { id: opendut_model::viper::ViperTestId },
     Downloads,
     ErrorPage { title: String, text: String, details: Option<String> },
 }
@@ -354,7 +354,7 @@ mod url_encode {
     }
 
     #[cfg(feature = "viper")]
-    impl UrlEncodable for opendut_model::viper::ViperRunId {
+    impl UrlEncodable for opendut_model::viper::ViperTestId {
         fn url_encode(&self) -> String {
             self.to_string()
         }

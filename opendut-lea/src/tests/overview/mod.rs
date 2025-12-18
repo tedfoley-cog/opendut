@@ -2,7 +2,7 @@ mod row;
 
 use leptos::prelude::*;
 use opendut_lea_components::{BasePageContainer, Breadcrumb, LoadingSpinner};
-use opendut_model::viper::ViperRunDescriptor;
+use opendut_model::viper::ViperTestDescriptor;
 use crate::app::use_app_globals;
 use crate::tests::components::CreateTestButton;
 use crate::tests::overview::row::Row;
@@ -13,7 +13,7 @@ pub fn TestsOverview() -> impl IntoView {
     let globals = use_app_globals();
     let refetch_registered_tests = RwSignal::new(());
 
-    let registered_tests: LocalResource<Vec<ViperRunDescriptor>> = {
+    let registered_tests: LocalResource<Vec<ViperTestDescriptor>> = {
         let carl = globals.client.clone();
 
         LocalResource::new(move || {

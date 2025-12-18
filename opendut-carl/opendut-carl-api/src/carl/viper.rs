@@ -2,7 +2,7 @@
 pub use client::*;
 
 use opendut_model::cluster::ClusterId;
-use opendut_model::viper::{ViperRunId, ViperSourceId, ViperSourceName};
+use opendut_model::viper::{ViperTestId, ViperSourceId, ViperSourceName};
 use opendut_model::format::{format_id_with_name, format_id_with_optional_name};
 
 
@@ -69,7 +69,7 @@ pub enum ListViperSourceDescriptorsError {
 pub enum StoreViperRunDescriptorError {
     #[error("Test suite run <{run_id}> could not be created, due to internal errors:\n  {cause}")]
     Internal {
-        run_id: ViperRunId,
+        run_id: ViperTestId,
         cause: String
     }
 }
@@ -78,16 +78,16 @@ pub enum StoreViperRunDescriptorError {
 pub enum DeleteViperRunDescriptorError {
     #[error("Test suite run <{run_id}> could not be deleted, because a run with that ID does not exist!")]
     RunNotFound {
-        run_id: ViperRunId,
+        run_id: ViperTestId,
     },
     #[error("Test suite run <{run_id}> could not be deleted, because a cluster deployment <{cluster_id}> using this run still exists!")]
     ClusterDeploymentExists {
-        run_id: ViperRunId,
+        run_id: ViperTestId,
         cluster_id: ClusterId,
     },
     #[error("Test suite run <{run_id}> deleted with internal errors:\n  {cause}")]
     Internal {
-        run_id: ViperRunId,
+        run_id: ViperTestId,
         cause: String,
     }
 }
@@ -96,11 +96,11 @@ pub enum DeleteViperRunDescriptorError {
 pub enum GetViperRunDescriptorError {
     #[error("A test suite run with ID <{run_id}> could not be found!")]
     RunNotFound {
-        run_id: ViperRunId
+        run_id: ViperTestId
     },
     #[error("An internal error occurred searching for a test suite run with ID <{run_id}>:\n  {cause}")]
     Internal {
-        run_id: ViperRunId,
+        run_id: ViperTestId,
         cause: String
     }
 }
@@ -122,7 +122,7 @@ pub enum ListViperRunDescriptorsError {
 pub enum StoreViperRunDeploymentError {
     #[error("Test suite run deployment <{run_id}> could not be created, due to internal errors:\n  {cause}")]
     Internal {
-        run_id: ViperRunId,
+        run_id: ViperTestId,
         cause: String
     }
 }
@@ -131,11 +131,11 @@ pub enum StoreViperRunDeploymentError {
 pub enum DeleteViperRunDeploymentError {
     #[error("Test suite run deployment <{run_id}> could not be deleted, because a run deployment with that ID does not exist!")]
     RunDeploymentNotFound {
-        run_id: ViperRunId,
+        run_id: ViperTestId,
     },
     #[error("Test suite run deployment <{run_id}> deleted with internal errors:\n  {cause}")]
     Internal {
-        run_id: ViperRunId,
+        run_id: ViperTestId,
         cause: String,
     }
 }
@@ -144,11 +144,11 @@ pub enum DeleteViperRunDeploymentError {
 pub enum GetViperRunDeploymentError {
     #[error("A test suite run deployment with ID <{run_id}> could not be found!")]
     RunDeploymentNotFound {
-        run_id: ViperRunId
+        run_id: ViperTestId
     },
     #[error("An internal error occurred searching for a test suite run deployment with ID <{run_id}>:\n  {cause}")]
     Internal {
-        run_id: ViperRunId,
+        run_id: ViperTestId,
         cause: String
     }
 }
@@ -166,7 +166,7 @@ pub enum ListViperRunDeploymentsError {
 mod client {
     use super::*;
     use tonic::codegen::{Body, Bytes, http, InterceptedService, StdError};
-    use opendut_model::viper::{ViperRunDescriptor, ViperRunId, ViperSourceDescriptor, ViperSourceId};
+    use opendut_model::viper::{ViperTestDescriptor, ViperTestId, ViperSourceDescriptor, ViperSourceId};
     use crate::carl::{extract, ClientError};
     use crate::proto::services::test_manager;
     use crate::proto::services::test_manager::test_manager_client::TestManagerClient;
@@ -298,7 +298,7 @@ mod client {
         }
 
 
-        pub async fn store_viper_run_descriptor(&mut self, descriptor: ViperRunDescriptor) -> Result<ViperRunId, ClientError<StoreViperRunDescriptorError>> {
+        pub async fn store_viper_run_descriptor(&mut self, descriptor: ViperTestDescriptor) -> Result<ViperTestId, ClientError<StoreViperRunDescriptorError>> {
 
             let request = tonic::Request::new(test_manager::StoreViperRunDescriptorRequest {
                 run: Some(descriptor.into()),
@@ -320,7 +320,7 @@ mod client {
         }
 
 
-        pub async fn delete_viper_run_descriptor(&mut self, run_id: ViperRunId) -> Result<ViperRunId, ClientError<DeleteViperRunDescriptorError>> {
+        pub async fn delete_viper_run_descriptor(&mut self, run_id: ViperTestId) -> Result<ViperTestId, ClientError<DeleteViperRunDescriptorError>> {
 
             let request = tonic::Request::new(test_manager::DeleteViperRunDescriptorRequest {
                 run_id: Some(run_id.into()),
@@ -341,7 +341,7 @@ mod client {
             }
         }
 
-        pub async fn get_viper_run_descriptor(&mut self, run_id: ViperRunId) -> Result<ViperRunDescriptor, ClientError<GetViperRunDescriptorError>> {
+        pub async fn get_viper_run_descriptor(&mut self, run_id: ViperTestId) -> Result<ViperTestDescriptor, ClientError<GetViperRunDescriptorError>> {
 
             let request = tonic::Request::new(test_manager::GetViperRunDescriptorRequest {
                 run_id: Some(run_id.into()),
@@ -362,7 +362,7 @@ mod client {
             }
         }
 
-        pub async fn list_viper_run_descriptors(&mut self) -> Result<Vec<ViperRunDescriptor>, ClientError<ListViperRunDescriptorsError>> {
+        pub async fn list_viper_run_descriptors(&mut self) -> Result<Vec<ViperTestDescriptor>, ClientError<ListViperRunDescriptorsError>> {
 
             let request = tonic::Request::new(test_manager::ListViperRunDescriptorsRequest {});
 
@@ -376,7 +376,7 @@ mod client {
                 }
                 test_manager::list_viper_run_descriptors_response::Reply::Success(success) => {
                     Ok(success.runs.into_iter()
-                        .map(ViperRunDescriptor::try_from)
+                        .map(ViperTestDescriptor::try_from)
                         .collect::<Result<Vec<_>, _>>()?
                     )
                 }

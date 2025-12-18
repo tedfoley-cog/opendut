@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use opendut_lea_components::UserInputValue;
 use opendut_model::cluster::ClusterId;
-use opendut_model::viper::{ViperRunDescriptor, ViperRunId, ViperRunName, ViperRunParameterKey, ViperRunParameterValue, ViperSourceId, ViperTestSuiteIdentifier};
+use opendut_model::viper::{ViperTestDescriptor, ViperTestId, ViperTestName, ViperTestParameterKey, ViperTestParameterValue, ViperSourceId, ViperTestSuiteIdentifier};
 
 #[derive(thiserror::Error, Clone, Debug, Eq, PartialEq, Hash)]
 #[allow(clippy::enum_variant_names)] // "all variants have the same prefix: `Invalid`"
@@ -22,7 +22,7 @@ pub enum TestMisconfiguration {
 
 #[derive(Clone, Debug)]
 pub struct UserTestConfiguration {
-    pub id: ViperRunId,
+    pub id: ViperTestId,
     pub name: UserInputValue,
     pub source: UserInputValue,
     pub suite: UserInputValue,
@@ -44,7 +44,7 @@ impl UserTestConfiguration {
     }
 }
 
-impl TryFrom<UserTestConfiguration> for ViperRunDescriptor {
+impl TryFrom<UserTestConfiguration> for ViperTestDescriptor {
     type Error = TestMisconfiguration;
 
     fn try_from(configuration: UserTestConfiguration) -> Result<Self, Self::Error> {
@@ -52,7 +52,7 @@ impl TryFrom<UserTestConfiguration> for ViperRunDescriptor {
             .name
             .right_ok_or(TestMisconfiguration::InvalidName)
             .and_then(|name| {
-                ViperRunName::try_from(name)
+                ViperTestName::try_from(name)
                     .map_err(|_| TestMisconfiguration::InvalidName)
             })?;
 
@@ -84,7 +84,7 @@ impl TryFrom<UserTestConfiguration> for ViperRunDescriptor {
 
         for (key_input, value_input) in configuration.parameters {
 
-            let key = ViperRunParameterKey {
+            let key = ViperTestParameterKey {
                 inner: key_input,
             };
 
@@ -95,7 +95,7 @@ impl TryFrom<UserTestConfiguration> for ViperRunDescriptor {
             parameters.insert(key, value);
         }
 
-        Ok(ViperRunDescriptor {
+        Ok(ViperTestDescriptor {
             id: configuration.id,
             name,
             source,
@@ -106,17 +106,17 @@ impl TryFrom<UserTestConfiguration> for ViperRunDescriptor {
     }
 }
 
-fn parse_parameter_value(raw: &str) -> ViperRunParameterValue {
+fn parse_parameter_value(raw: &str) -> ViperTestParameterValue {
     if raw.eq_ignore_ascii_case("true") {
-        ViperRunParameterValue::Boolean(true)
+        ViperTestParameterValue::Boolean(true)
     }
     else if raw.eq_ignore_ascii_case("false") {
-        ViperRunParameterValue::Boolean(false)
+        ViperTestParameterValue::Boolean(false)
     }
     else if let Ok(num) = raw.parse::<i64>() {
-        ViperRunParameterValue::Number(num)
+        ViperTestParameterValue::Number(num)
     }
     else {
-        ViperRunParameterValue::Text(raw.to_owned())
+        ViperTestParameterValue::Text(raw.to_owned())
     }
 }
