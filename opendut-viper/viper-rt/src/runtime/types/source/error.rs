@@ -50,6 +50,7 @@ impl InvalidSourceLocationError {
         }
     }
 
+    #[cfg(not(target_arch = "wasm32"))]
     pub(crate) fn new_non_absolute_path_error(
         path: PathBuf,
     ) -> Self {

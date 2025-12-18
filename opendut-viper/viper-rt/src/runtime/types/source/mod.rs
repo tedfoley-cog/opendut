@@ -1,7 +1,6 @@
 pub mod error;
 
 use crate::runtime::types::source::error::InvalidSourceLocationError;
-use std::path::PathBuf;
 use url::Url;
 use crate::common::TestSuiteIdentifier;
 
@@ -39,7 +38,7 @@ impl Source {
     }
 
     #[cfg(not(target_arch = "wasm32"))]
-    pub fn try_from_path(identifier: TestSuiteIdentifier, path: &PathBuf) -> Result<Self, InvalidSourceLocationError> {
+    pub fn try_from_path(identifier: TestSuiteIdentifier, path: &std::path::PathBuf) -> Result<Self, InvalidSourceLocationError> {
         let url = Url::from_file_path(path)
             .map_err(|_| InvalidSourceLocationError::new_non_absolute_path_error(Clone::clone(path)))?;
         Self::try_from_url(identifier, url)
