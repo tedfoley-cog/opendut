@@ -4,7 +4,7 @@ use opendut_carl_api::proto::services::test_manager::{delete_viper_source_descri
 use opendut_carl_api::proto::services::test_manager::{delete_viper_test_descriptor_response, get_viper_test_descriptor_response, list_viper_test_descriptors_response, store_viper_test_descriptor_response, DeleteViperTestDescriptorRequest, DeleteViperTestDescriptorResponse, DeleteViperTestDescriptorSuccess, GetViperTestDescriptorRequest, GetViperTestDescriptorResponse, GetViperTestDescriptorSuccess, ListViperTestDescriptorsRequest, ListViperTestDescriptorsResponse, ListViperTestDescriptorsSuccess, StoreViperTestDescriptorRequest, StoreViperTestDescriptorResponse, StoreViperTestDescriptorSuccess};
 use opendut_carl_api::proto::services::test_manager::{delete_viper_run_deployment_response, get_viper_run_deployment_response, list_viper_run_deployments_response, store_viper_run_deployment_response, DeleteViperRunDeploymentRequest, DeleteViperRunDeploymentResponse, DeleteViperRunDeploymentSuccess, GetViperRunDeploymentRequest, GetViperRunDeploymentResponse, GetViperRunDeploymentSuccess, ListViperRunDeploymentsRequest, ListViperRunDeploymentsResponse, ListViperRunDeploymentsSuccess, StoreViperRunDeploymentRequest, StoreViperRunDeploymentResponse, StoreViperRunDeploymentSuccess};
 use opendut_carl_api::proto::services::test_manager::test_manager_server::{TestManager as TestManagerService, TestManagerServer};
-use opendut_model::viper::{ViperRunDeployment, ViperTestDescriptor, ViperTestId, ViperSourceDescriptor, ViperSourceId};
+use opendut_model::viper::{ViperRunDeployment, ViperTestDescriptor, ViperTestId, ViperSourceDescriptor, ViperRunId, ViperSourceId};
 use crate::manager::grpc::error::LogApiErr;
 use crate::manager::grpc::extract;
 use crate::resource::manager::ResourceManagerRef;
@@ -300,17 +300,17 @@ impl TestManagerService for TestManagerFacade {
 
 
         let result =
-            self.resource_manager.insert(run.test_id, run.clone()).await
+            self.resource_manager.insert(run.run_id, run.clone()).await
                 .log_api_err()
                 .map_err(|_: PersistenceError| opendut_carl_api::carl::viper::StoreViperRunDeploymentError::Internal {
-                    run_id: run.test_id,
+                    run_id: run.run_id,
                     cause: String::from("Error when accessing persistence while storing test suite run deployment"),
                 });
 
         let reply = match result {
             Ok(()) => store_viper_run_deployment_response::Reply::Success(
                 StoreViperRunDeploymentSuccess {
-                    run_id: Some(run.test_id.into()),
+                    run_id: Some(run.run_id.into()),
                 }
             ),
             Err(error) => store_viper_run_deployment_response::Reply::Failure(error.into()),
@@ -325,7 +325,7 @@ impl TestManagerService for TestManagerFacade {
     async fn delete_viper_run_deployment(&self, request: Request<DeleteViperRunDeploymentRequest>) -> Result<Response<DeleteViperRunDeploymentResponse>, Status> {
 
         let request = request.into_inner();
-        let run_id: ViperTestId = extract!(request.run_id)?;
+        let run_id: ViperRunId = extract!(request.run_id)?;
 
         trace!("Received request to delete test suite run deployment for run <{run_id}>.");
 
@@ -355,7 +355,7 @@ impl TestManagerService for TestManagerFacade {
     async fn get_viper_run_deployment(&self, request: Request<GetViperRunDeploymentRequest>) -> Result<Response<GetViperRunDeploymentResponse>, Status> {
 
         let request = request.into_inner();
-        let run_id: ViperTestId = extract!(request.run_id)?;
+        let run_id: ViperRunId = extract!(request.run_id)?;
 
         trace!("Received request to get test suite run deployment for run <{run_id}>.");
 

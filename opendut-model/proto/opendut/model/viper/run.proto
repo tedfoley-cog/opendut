@@ -2,10 +2,15 @@ syntax = "proto3";
 
 package opendut.model.viper;
 
+import "opendut/model/util/uuid.proto";
 import "opendut/model/viper/test.proto";
 
 
 message ViperRunDeployment {
-  opendut.model.viper.ViperTestId test_id = 1;
-  //TODO maybe introduce ID for each run
+  ViperRunId run_id = 1;
+  opendut.model.viper.ViperTestId test_id = 2;
+}
+
+message ViperRunId {
+  opendut.model.util.Uuid uuid = 1;
 }

@@ -6,7 +6,7 @@ use opendut_model::peer::{PeerDescriptor, PeerId};
 use opendut_model::resources::Id;
 
 #[cfg(feature = "viper")]
-use opendut_model::viper::{ViperRunDeployment, ViperTestDescriptor, ViperTestId, ViperSourceDescriptor, ViperSourceId};
+use opendut_model::viper::{ViperRunDeployment, ViperTestDescriptor, ViperTestId, ViperSourceDescriptor, ViperSourceId, ViperRunId};
 
 pub trait ResourceId<R: Resource> {
     fn into_id(self) -> Id;
@@ -83,11 +83,11 @@ impl ResourceId<ViperTestDescriptor> for ViperTestId {
 }
 
 #[cfg(feature = "viper")]
-impl ResourceId<ViperRunDeployment> for ViperTestId {
+impl ResourceId<ViperRunDeployment> for ViperRunId {
     fn into_id(self) -> Id {
         Id::from(self.uuid)
     }
     fn from_id(id: Id) -> Self {
-        ViperTestId::from(id.value())
+        ViperRunId::from(id.value())
     }
 }

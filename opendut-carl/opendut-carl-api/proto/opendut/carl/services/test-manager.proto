@@ -321,7 +321,7 @@ message StoreViperRunDeploymentResponse {
 }
 
 message StoreViperRunDeploymentSuccess {
-  opendut.model.viper.ViperTestId run_id = 1;
+  opendut.model.viper.ViperRunId run_id = 1;
 }
 
 message StoreViperRunDeploymentFailure {
@@ -331,7 +331,7 @@ message StoreViperRunDeploymentFailure {
 }
 
 message StoreViperRunDeploymentFailureInternal {
-  opendut.model.viper.ViperTestId run_id = 1;
+  opendut.model.viper.ViperRunId run_id = 1;
   string cause = 2;
 }
 
@@ -340,7 +340,7 @@ message StoreViperRunDeploymentFailureInternal {
 // DeleteViperRunDeployment
 //
 message DeleteViperRunDeploymentRequest {
-  opendut.model.viper.ViperTestId run_id = 1;
+  opendut.model.viper.ViperRunId run_id = 1;
 }
 
 message DeleteViperRunDeploymentResponse {
@@ -351,7 +351,7 @@ message DeleteViperRunDeploymentResponse {
 }
 
 message DeleteViperRunDeploymentSuccess {
-  opendut.model.viper.ViperTestId run_id = 1;
+  opendut.model.viper.ViperRunId run_id = 1;
 }
 
 message DeleteViperRunDeploymentFailure {
@@ -362,11 +362,11 @@ message DeleteViperRunDeploymentFailure {
 }
 
 message DeleteViperRunDeploymentFailureRunNotFound {
-  opendut.model.viper.ViperTestId run_id = 1;
+  opendut.model.viper.ViperRunId run_id = 1;
 }
 
 message DeleteViperRunDeploymentFailureInternal {
-  opendut.model.viper.ViperTestId run_id = 1;
+  opendut.model.viper.ViperRunId run_id = 1;
   string cause = 2;
 }
 
@@ -375,7 +375,7 @@ message DeleteViperRunDeploymentFailureInternal {
 // GetViperRunDeployment
 //
 message GetViperRunDeploymentRequest {
-  opendut.model.viper.ViperTestId run_id = 1;
+  opendut.model.viper.ViperRunId run_id = 1;
 }
 
 message GetViperRunDeploymentResponse {
@@ -397,11 +397,11 @@ message GetViperRunDeploymentFailure {
 }
 
 message GetViperRunDeploymentFailureRunNotFound {
-  opendut.model.viper.ViperTestId run_id = 1;
+  opendut.model.viper.ViperRunId run_id = 1;
 }
 
 message GetViperRunDeploymentFailureInternal {
-  opendut.model.viper.ViperTestId run_id = 1;
+  opendut.model.viper.ViperRunId run_id = 1;
   string cause = 2;
 }
 

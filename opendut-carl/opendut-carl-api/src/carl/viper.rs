@@ -2,7 +2,7 @@
 pub use client::*;
 
 use opendut_model::cluster::ClusterId;
-use opendut_model::viper::{ViperTestId, ViperSourceId, ViperSourceName};
+use opendut_model::viper::{ViperTestId, ViperSourceId, ViperSourceName, ViperRunId};
 use opendut_model::format::{format_id_with_name, format_id_with_optional_name};
 
 
@@ -122,7 +122,7 @@ pub enum ListViperTestDescriptorsError {
 pub enum StoreViperRunDeploymentError {
     #[error("VIPER run deployment <{run_id}> could not be created, due to internal errors:\n  {cause}")]
     Internal {
-        run_id: ViperTestId,
+        run_id: ViperRunId,
         cause: String
     }
 }
@@ -131,11 +131,11 @@ pub enum StoreViperRunDeploymentError {
 pub enum DeleteViperRunDeploymentError {
     #[error("VIPER run deployment <{run_id}> could not be deleted, because a run deployment with that ID does not exist!")]
     RunDeploymentNotFound {
-        run_id: ViperTestId,
+        run_id: ViperRunId,
     },
     #[error("VIPER run deployment <{run_id}> deleted with internal errors:\n  {cause}")]
     Internal {
-        run_id: ViperTestId,
+        run_id: ViperRunId,
         cause: String,
     }
 }
@@ -144,11 +144,11 @@ pub enum DeleteViperRunDeploymentError {
 pub enum GetViperRunDeploymentError {
     #[error("A VIPER run deployment with ID <{run_id}> could not be found!")]
     RunDeploymentNotFound {
-        run_id: ViperTestId
+        run_id: ViperRunId
     },
     #[error("An internal error occurred searching for a VIPER run deployment with ID <{run_id}>:\n  {cause}")]
     Internal {
-        run_id: ViperTestId,
+        run_id: ViperRunId,
         cause: String
     }
 }

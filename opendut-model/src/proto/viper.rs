@@ -193,14 +193,34 @@ conversion! {
 
     fn from(value: Model) -> Proto {
         Proto {
+            run_id: Some(value.run_id.into()),
             test_id: Some(value.test_id.into()),
         }
     }
 
     fn try_from(value: Proto) -> ConversionResult<Model> {
+        let run_id = extract!(value.run_id)?
+            .try_into()?;
+
         let test_id = extract!(value.test_id)?
             .try_into()?;
 
-        Ok(Model { test_id })
+        Ok(Model { run_id, test_id })
+    }
+}
+
+conversion! {
+    type Model = crate::viper::ViperRunId;
+    type Proto = ViperRunId;
+
+    fn from(value: Model) -> Proto {
+        Proto {
+            uuid: Some(value.uuid.into())
+        }
+    }
+
+    fn try_from(value: Proto) -> ConversionResult<Model> {
+        extract!(value.uuid)
+            .map(|uuid| Model { uuid: uuid.into() })
     }
 }
