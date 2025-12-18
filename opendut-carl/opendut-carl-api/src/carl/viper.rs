@@ -12,7 +12,7 @@ use opendut_model::format::{format_id_with_name, format_id_with_optional_name};
 
 #[derive(thiserror::Error, Debug)]
 pub enum StoreViperSourceDescriptorError {
-    #[error("Test suite source {source} could not be created, due to internal errors:\n  {cause}", source=format_id_with_name(source_id, source_name))]
+    #[error("VIPER source {source} could not be created, due to internal errors:\n  {cause}", source=format_id_with_name(source_id, source_name))]
     Internal {
         source_id: ViperSourceId,
         source_name: ViperSourceName,
@@ -22,16 +22,16 @@ pub enum StoreViperSourceDescriptorError {
 
 #[derive(thiserror::Error, Debug)]
 pub enum DeleteViperSourceDescriptorError {
-    #[error("Test suite source <{source_id}> could not be deleted, because a source with that ID does not exist!")]
+    #[error("VIPER source <{source_id}> could not be deleted, because a source with that ID does not exist!")]
     SourceNotFound {
         source_id: ViperSourceId,
     },
-    #[error("Test suite source <{source_id}> could not be deleted, because a cluster deployment <{cluster_id}> using this source still exists!")]
+    #[error("VIPER source <{source_id}> could not be deleted, because a cluster deployment <{cluster_id}> using this source still exists!")]
     ClusterDeploymentExists {
         source_id: ViperSourceId,
         cluster_id: ClusterId,
     },
-    #[error("Test suite source {source} deleted with internal errors:\n  {cause}", source=format_id_with_optional_name(source_id, source_name))]
+    #[error("VIPER source {source} deleted with internal errors:\n  {cause}", source=format_id_with_optional_name(source_id, source_name))]
     Internal {
         source_id: ViperSourceId,
         source_name: Option<ViperSourceName>,
@@ -41,11 +41,11 @@ pub enum DeleteViperSourceDescriptorError {
 
 #[derive(thiserror::Error, Debug)]
 pub enum GetViperSourceDescriptorError {
-    #[error("A test suite source with ID <{source_id}> could not be found!")]
+    #[error("A VIPER source with ID <{source_id}> could not be found!")]
     SourceNotFound {
         source_id: ViperSourceId
     },
-    #[error("An internal error occurred searching for a test suite source with ID <{source_id}>:\n  {cause}")]
+    #[error("An internal error occurred searching for a VIPER source with ID <{source_id}>:\n  {cause}")]
     Internal {
         source_id: ViperSourceId,
         cause: String
@@ -54,7 +54,7 @@ pub enum GetViperSourceDescriptorError {
 
 #[derive(thiserror::Error, Debug)]
 pub enum ListViperSourceDescriptorsError {
-    #[error("An internal error occurred computing the list of test suite sources:\n  {cause}")]
+    #[error("An internal error occurred computing the list of VIPER sources:\n  {cause}")]
     Internal {
         cause: String
     }
@@ -80,7 +80,7 @@ pub enum DeleteViperTestDescriptorError {
     TestNotFound {
         test_id: ViperTestId,
     },
-    #[error("Test <{test_id}> could not be deleted, because a cluster deployment <{cluster_id}> using this run still exists!")]
+    #[error("Test <{test_id}> could not be deleted, because a cluster deployment <{cluster_id}> using this test still exists!")]
     ClusterDeploymentExists {
         test_id: ViperTestId,
         cluster_id: ClusterId,
@@ -107,7 +107,7 @@ pub enum GetViperTestDescriptorError {
 
 #[derive(thiserror::Error, Debug)]
 pub enum ListViperTestDescriptorsError {
-    #[error("An internal error occurred computing the list of test suite runs:\n  {cause}")]
+    #[error("An internal error occurred computing the list of VIPER test descriptors:\n  {cause}")]
     Internal {
         cause: String
     }
@@ -120,7 +120,7 @@ pub enum ListViperTestDescriptorsError {
 
 #[derive(thiserror::Error, Debug)]
 pub enum StoreViperRunDeploymentError {
-    #[error("Test suite run deployment <{run_id}> could not be created, due to internal errors:\n  {cause}")]
+    #[error("VIPER run deployment <{run_id}> could not be created, due to internal errors:\n  {cause}")]
     Internal {
         run_id: ViperTestId,
         cause: String
@@ -129,11 +129,11 @@ pub enum StoreViperRunDeploymentError {
 
 #[derive(thiserror::Error, Debug)]
 pub enum DeleteViperRunDeploymentError {
-    #[error("Test suite run deployment <{run_id}> could not be deleted, because a run deployment with that ID does not exist!")]
+    #[error("VIPER run deployment <{run_id}> could not be deleted, because a run deployment with that ID does not exist!")]
     RunDeploymentNotFound {
         run_id: ViperTestId,
     },
-    #[error("Test suite run deployment <{run_id}> deleted with internal errors:\n  {cause}")]
+    #[error("VIPER run deployment <{run_id}> deleted with internal errors:\n  {cause}")]
     Internal {
         run_id: ViperTestId,
         cause: String,
@@ -142,11 +142,11 @@ pub enum DeleteViperRunDeploymentError {
 
 #[derive(thiserror::Error, Debug)]
 pub enum GetViperRunDeploymentError {
-    #[error("A test suite run deployment with ID <{run_id}> could not be found!")]
+    #[error("A VIPER run deployment with ID <{run_id}> could not be found!")]
     RunDeploymentNotFound {
         run_id: ViperTestId
     },
-    #[error("An internal error occurred searching for a test suite run deployment with ID <{run_id}>:\n  {cause}")]
+    #[error("An internal error occurred searching for a VIPER run deployment with ID <{run_id}>:\n  {cause}")]
     Internal {
         run_id: ViperTestId,
         cause: String
@@ -155,7 +155,7 @@ pub enum GetViperRunDeploymentError {
 
 #[derive(thiserror::Error, Debug)]
 pub enum ListViperRunDeploymentsError {
-    #[error("An internal error occurred computing the list of test suite run deployments:\n  {cause}")]
+    #[error("An internal error occurred computing the list of VIPER run deployments:\n  {cause}")]
     Internal {
         cause: String
     }

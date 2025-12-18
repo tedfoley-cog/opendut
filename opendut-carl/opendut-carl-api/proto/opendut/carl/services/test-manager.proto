@@ -3,7 +3,7 @@ syntax = "proto3";
 package opendut.carl.services.test_manager;
 
 import "opendut/model/cluster/cluster.proto";
-import "opendut/model/viper/deployment.proto";
+import "opendut/model/viper/run.proto";
 import "opendut/model/viper/test.proto";
 import "opendut/model/viper/source.proto";
 
@@ -30,7 +30,7 @@ service TestManager {
 ///////////////////////////
 
 //
-// StoreViperSourceDescriptorRequest
+// StoreViperSourceDescriptor
 //
 message StoreViperSourceDescriptorRequest {
   opendut.model.viper.ViperSourceDescriptor source = 1;
@@ -61,7 +61,7 @@ message StoreViperSourceDescriptorFailureInternal {
 
 
 //
-// DeleteViperSourceDescriptorRequest
+// DeleteViperSourceDescriptor
 //
 message DeleteViperSourceDescriptorRequest {
   opendut.model.viper.ViperSourceId source_id = 1;
@@ -103,7 +103,7 @@ message DeleteViperSourceDescriptorFailureDeploymentExists {
 
 
 //
-// GetViperSourceDescriptorRequest
+// GetViperSourceDescriptor
 //
 message GetViperSourceDescriptorRequest {
   opendut.model.viper.ViperSourceId source_id = 1;
@@ -138,7 +138,7 @@ message GetViperSourceDescriptorFailureInternal {
 
 
 //
-// ListViperSourceRequest
+// ListViperSourceDescriptors
 //
 message ListViperSourceDescriptorsRequest {}
 
@@ -170,7 +170,7 @@ message ListViperSourceDescriptorsFailureInternal {
 /////////////////////////
 
 //
-// StoreViperTestDescriptorRequest
+// StoreViperTestDescriptor
 //
 message StoreViperTestDescriptorRequest {
   opendut.model.viper.ViperTestDescriptor test = 1;
@@ -200,7 +200,7 @@ message StoreViperTestDescriptorFailureInternal {
 
 
 //
-// DeleteViperTestDescriptorRequest
+// DeleteViperTestDescriptor
 //
 message DeleteViperTestDescriptorRequest {
   opendut.model.viper.ViperTestId test_id = 1;
@@ -241,7 +241,7 @@ message DeleteViperTestDescriptorFailureDeploymentExists {
 
 
 //
-// GetViperTestDescriptorRequest
+// GetViperTestDescriptor
 //
 message GetViperTestDescriptorRequest {
   opendut.model.viper.ViperTestId test_id = 1;
@@ -276,7 +276,7 @@ message GetViperTestDescriptorFailureInternal {
 
 
 //
-// ListViperTestRequest
+// ListViperTestDescriptors
 //
 message ListViperTestDescriptorsRequest {}
 
@@ -307,7 +307,7 @@ message ListViperTestDescriptorsFailureInternal {
 ////////////////////////
 
 //
-// StoreViperRunDeploymentRequest
+// StoreViperRunDeployment
 //
 message StoreViperRunDeploymentRequest {
   opendut.model.viper.ViperRunDeployment run = 1;
@@ -337,7 +337,7 @@ message StoreViperRunDeploymentFailureInternal {
 
 
 //
-// DeleteViperRunDeploymentRequest
+// DeleteViperRunDeployment
 //
 message DeleteViperRunDeploymentRequest {
   opendut.model.viper.ViperTestId run_id = 1;
@@ -372,7 +372,7 @@ message DeleteViperRunDeploymentFailureInternal {
 
 
 //
-// GetViperRunDeploymentRequest
+// GetViperRunDeployment
 //
 message GetViperRunDeploymentRequest {
   opendut.model.viper.ViperTestId run_id = 1;
@@ -407,7 +407,7 @@ message GetViperRunDeploymentFailureInternal {
 
 
 //
-// ListViperRunRequest
+// ListViperRunDeployments
 //
 message ListViperRunDeploymentsRequest {}
 
