@@ -71,7 +71,7 @@ pub mod oidc {
         }
 
         client.build()
-            .map_err(|cause| anyhow!(cause.to_string()))
+            .context("Error while building reqwest client")
     }
 }
 
