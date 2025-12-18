@@ -475,9 +475,11 @@ services:
       # Network
       - OPENDUT_CARL_NETWORK_REMOTE_HOST=${OPENDUT_DOMAIN_CARL}
       - OPENDUT_CARL_NETWORK_REMOTE_PORT=443
-      - OPENDUT_CARL_NETWORK_BIND_PORT=80
+      - OPENDUT_CARL_NETWORK_BIND_PORT=443
       - OPENDUT_CARL_NETWORK_TLS_CA=${OPENDUT_CERT_CA_PATH}
-      - OPENDUT_CARL_NETWORK_TLS_ENABLED=false
+      - OPENDUT_CARL_NETWORK_TLS_ENABLED=true
+      - OPENDUT_CARL_NETWORK_TLS_KEY
+      - OPENDUT_CARL_NETWORK_TLS_CERTIFICATE
       # CURL
       - SSL_CERT_FILE=${OPENDUT_CERT_CA_PATH}
       # VPN
@@ -510,16 +512,19 @@ services:
       - KEYCLOAK_URL=https://${OPENDUT_DOMAIN_AUTH}/
       - NETBIRD_MANAGEMENT_URL=https://${OPENDUT_DOMAIN_NETBIRD_API}
       - NETBIRD_PASSWORD
-      
+
     # https://docs.docker.com/reference/dockerfile/#healthcheck
     healthcheck:
       <<: *common-healthcheck-params
-      test: [ "CMD-SHELL", "curl --fail --silent --output /dev/null --noproxy '*' http://localhost || exit 1" ]
+      test: [ "CMD-SHELL", "curl --fail --silent --output /dev/null --noproxy '*' --insecure https://localhost || exit 1" ]
+
     labels:
       - traefik.enable=true
-      - traefik.http.routers.carl.rule=Host(`${OPENDUT_DOMAIN_CARL}`)
-      - traefik.http.services.carl.loadbalancer.server.scheme=h2c
-      - traefik.http.services.carl.loadbalancer.server.port=80
+      # CARL requires a TCP router or else GRPC streams won't work
+      - traefik.tcp.routers.carl.rule=HostSNI(`${OPENDUT_DOMAIN_CARL}`)
+      - traefik.tcp.routers.carl.tls.passthrough=true
+      - traefik.tcp.services.carl.loadbalancer.server.port=443
+
     networks:
       - opendut_local
 
