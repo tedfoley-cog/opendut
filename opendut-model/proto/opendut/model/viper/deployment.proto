@@ -6,6 +6,6 @@ import "opendut/model/viper/test.proto";
 
 
 message ViperRunDeployment {
-  opendut.model.viper.ViperTestId id = 1;
+  opendut.model.viper.ViperTestId test_id = 1;
   //TODO maybe introduce ID for each run
 }

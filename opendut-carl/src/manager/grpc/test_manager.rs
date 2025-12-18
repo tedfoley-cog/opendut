@@ -300,17 +300,17 @@ impl TestManagerService for TestManagerFacade {
 
 
         let result =
-            self.resource_manager.insert(run.id, run.clone()).await
+            self.resource_manager.insert(run.test_id, run.clone()).await
                 .log_api_err()
                 .map_err(|_: PersistenceError| opendut_carl_api::carl::viper::StoreViperRunDeploymentError::Internal {
-                    run_id: run.id,
+                    run_id: run.test_id,
                     cause: String::from("Error when accessing persistence while storing test suite run deployment"),
                 });
 
         let reply = match result {
             Ok(()) => store_viper_run_deployment_response::Reply::Success(
                 StoreViperRunDeploymentSuccess {
-                    run_id: Some(run.id.into()),
+                    run_id: Some(run.test_id.into()),
                 }
             ),
             Err(error) => store_viper_run_deployment_response::Reply::Failure(error.into()),

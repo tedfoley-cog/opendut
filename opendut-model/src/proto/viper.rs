@@ -193,14 +193,14 @@ conversion! {
 
     fn from(value: Model) -> Proto {
         Proto {
-            id: Some(value.id.into()),
+            test_id: Some(value.test_id.into()),
         }
     }
 
     fn try_from(value: Proto) -> ConversionResult<Model> {
-        let id = extract!(value.id)?
+        let test_id = extract!(value.test_id)?
             .try_into()?;
 
-        Ok(Model { id })
+        Ok(Model { test_id })
     }
 }
