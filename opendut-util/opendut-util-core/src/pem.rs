@@ -85,7 +85,14 @@ fn read_pem_from_config_key(config_key: &str, config: &Config) -> anyhow::Result
             .ok()?;
 
         read_pem_from_file_path(&path)
-            .inspect_err(|cause| error!("Error while reading PEM from path {path:?} configured via configuration key '{config_key}': {cause}"))
+            .inspect_err(|cause| {
+                let mut error_message = cause.to_string();
+                for error in cause.chain() {
+                    error_message.push_str("\n    Caused by: ");
+                    error_message.push_str(&error.to_string())
+                }
+                error!("Error while reading PEM from path {path:?} configured via configuration key '{config_key}': {error_message}")
+            })
             .ok()
     }
 
