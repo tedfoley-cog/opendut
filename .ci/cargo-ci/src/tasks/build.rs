@@ -31,6 +31,12 @@ pub fn distribution_build(package: Package, target: Arch, release_build: bool) -
 
     if release_build {
         command.arg("--release");
+    } else {
+         // Optimize for binary size, since compressing, uncompressing and transferring the binary can take a long time: https://doc.rust-lang.org/cargo/reference/profiles.html
+         // We still want a non-release profile, since `shadow-rs` will update timestamps in those, which breaks caching of distributions.
+        command
+            .arg("--config").arg("profile.dev.opt-level='s'")
+            .arg("--config").arg("profile.dev.debug=false");
     }
 
     command.run_requiring_success()
