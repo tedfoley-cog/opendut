@@ -19,13 +19,14 @@ RUN /opt/keycloak/bin/kc.sh build
 
 FROM registry.access.redhat.com/ubi9 AS ubi-micro-build
 
-#COPY ./resources/development/tls/ /opendut-tls/
-#RUN cp /opendut-tls/*-ca.pem /etc/pki/ca-trust/source/anchors/ && update-ca-trust
-
-RUN mkdir -p /mnt/rootfs
-# Removes this warning "This system is not registered to Red Hat Subscription Management. You can use subscription-manager to register."
-RUN dnf remove -y subscription-manager
-RUN dnf install --installroot /mnt/rootfs curl jq --releasever 9 --setopt install_weak_deps=false --nodocs -y; dnf --installroot /mnt/rootfs clean all
+RUN mkdir -p /mnt/rootfs \
+    && dnf remove -y subscription-manager \
+    && dnf install --installroot /mnt/rootfs curl jq \
+           --releasever 9 \
+           --setopt install_weak_deps=false \
+           --nodocs -y \
+    && dnf --installroot /mnt/rootfs clean all \
+    && rpm --root /mnt/rootfs -e --nodeps setup
 
 
 FROM quay.io/keycloak/keycloak:$KEYCLOAK_VERSION
@@ -35,9 +36,7 @@ LABEL image.version=$KEYCLOAK_VERSION
 COPY --from=builder /opt/keycloak/ /opt/keycloak/
 
 USER root
-COPY --from=ubi-micro-build /mnt/rootfs/usr/bin/curl /usr/bin/curl
-COPY --from=ubi-micro-build /mnt/rootfs/usr/bin/jq /usr/bin/jq
-COPY --from=ubi-micro-build /mnt/rootfs/usr/lib64/ /usr/lib64/
+COPY --from=ubi-micro-build /mnt/rootfs /
 
 # If any themes
 # COPY themes/<nice-themes> /opt/keycloak/themes/<nice-themes>
