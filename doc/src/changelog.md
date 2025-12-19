@@ -9,7 +9,7 @@ since migrations are only provided from one version to the next.
 Always create a database backup before upgrading CARL.
 
 
-## Unreleased
+## [0.9.0] - 2025-12-19
 
 ### Added
 * openDuT can now be run with mTLS client authentication.
