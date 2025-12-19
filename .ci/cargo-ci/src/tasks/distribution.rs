@@ -1,5 +1,6 @@
 use crate::fs;
 use std::path::PathBuf;
+use flate2::Compression;
 use tracing::debug;
 
 use crate::{Arch, constants, Package};
@@ -111,16 +112,16 @@ pub mod bundle {
     }
     impl DistributionBundleFilesCli {
         pub fn default_handling(&self, package: Package) -> crate::Result {
+            let release_build = true; //this CLI is only used in CI
             for target in self.target.iter() {
-                bundle_files(package, target)?;
+                bundle_files(package, target, release_build)?;
             }
             Ok(())
         }
     }
 
     #[tracing::instrument(skip_all)]
-    pub fn bundle_files(package: Package, target: Arch) -> crate::Result {
-        use flate2::Compression;
+    pub fn bundle_files(package: Package, target: Arch, release_build: bool) -> crate::Result {
         use flate2::write::GzEncoder;
 
         let in_dir = out_package_dir(package, target);
@@ -149,9 +150,7 @@ pub mod bundle {
         let out_file = fs::File::create(out_file)?;
 
         let mut tar_gz = tar::Builder::new(
-            //TODO Optimize the way the CARL distribution is built (don't remove all files every time), then switch this back to Compression::best().
-            // While benchmarking the EDGAR distribution, Compression::best() took 20+ seconds for 19MB. Compression::fast() took 7 seconds for 21MB.
-            GzEncoder::new(out_file, Compression::fast())
+            GzEncoder::new(out_file, select_compression_level(release_build))
         );
         tar_gz.append_dir_all(package.ident(), &in_dir)?;
         tar_gz.into_inner()?.finish()?;
@@ -199,4 +198,22 @@ pub fn out_arch_dir(target: Arch) -> PathBuf {
 
 pub fn out_package_dir(package: Package, target: Arch) -> PathBuf {
     out_arch_dir(target).join(package.ident())
+}
+
+/// Choose best compression level for different tasks.
+///
+/// Benchmarked compression levels for EDGAR debug distribution on 2025-12-18 (resulting archive file size + tracing-timing for bundle_files):
+///   best:    31.1MB, 23.7s
+///   default: 31.2MB, 11.9s
+///   fast:    36.0MB, 5.24s
+///   none:    70.3MB, 2.86s
+///
+/// The file-size jump from `fast` to `default` hardly warrants differentiating for EDGAR,
+/// but the hope is that the CARL distribution benefits more from this.
+fn select_compression_level(release_build: bool) -> Compression {
+    if release_build {
+        Compression::default()
+    } else {
+        Compression::fast()
+    }
 }

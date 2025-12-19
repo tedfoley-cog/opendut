@@ -120,7 +120,7 @@ pub mod distribution {
         lea::get_lea(&distribution_out_dir, release_build)?;
         copy_license_json::copy_license_json(target, SkipGenerate::No)?;
 
-        distribution::bundle::bundle_files(SELF_PACKAGE, target)?;
+        distribution::bundle::bundle_files(SELF_PACKAGE, target, release_build)?;
 
         validate::validate_contents(target)?;
 

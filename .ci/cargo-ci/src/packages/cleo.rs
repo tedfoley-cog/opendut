@@ -90,7 +90,7 @@ pub mod distribution {
 
                 distribution::copy_license_json::copy_license_json(SELF_PACKAGE, target, SkipGenerate::No)?;
 
-                distribution::bundle::bundle_files(SELF_PACKAGE, target)?;
+                distribution::bundle::bundle_files(SELF_PACKAGE, target, release_build)?;
 
                 validate::validate_contents(target)?;
 
