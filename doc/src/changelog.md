@@ -11,10 +11,21 @@ Always create a database backup before upgrading CARL.
 
 ## Unreleased
 
+### Added
+* openDuT can now be run with mTLS client authentication.
+  Mind that NetBird is currently excluded from this, as it does not implement mTLS support.
+* The openDuT backend containers can now be run on ARM64.
+* EDGAR: Persist into configuration file when configuration values are set via environment variables during EDGAR Setup.
+* LEA: Show for each UI tab when there are configuration errors within.
+* Certificates and keys are now loaded in a consistent fashion, allowing more flexible configuration.
+  For more details, see: https://opendut.eclipse.dev/book/user-manual/configuration.html#tls-certificates
+
 ### Changed
 * Netbird: Update NetBird to version 0.60.2.
+* Replace Coturn with NetBird Relay server.
+  The relay server uses port 443, making the openDuT backend fully hostable with just port 443 exposed.
 * API: Change NetBird SetupKey from UUID to String (breaking change).
-* EDGAR: Persist into configuration file when configuration values are set via environment variables during EDGAR Setup.
+
 
 ## [0.8.0] - 2025-11-20
 
@@ -41,7 +52,6 @@ Always create a database backup before upgrading CARL.
   This frees up the traffic light from showing the actual cluster health, once we implement that.
 * LEA: There is now a delete-button in the overviews for Peers and Clusters.
 * CLEO: It is now possible to control the log level by passing multiple `--verbose` flags.
-
 
 ### Fixed
 * Increased the default MTU to 1542 Bytes to allow a VLAN tag by default.
