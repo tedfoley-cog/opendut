@@ -107,6 +107,7 @@ services:
     - KC_BOOTSTRAP_ADMIN_PASSWORD=${KEYCLOAK_ADMIN_PASSWORD}
     labels:
       - traefik.enable=true
+      - traefik.http.routers.keycloak.tls=true
       - traefik.http.routers.keycloak.rule=Host(`${OPENDUT_DOMAIN_AUTH}`)
       - logging=alloy
       - logging_job=keycloak
@@ -161,7 +162,6 @@ services:
       - --providers.docker
       - --entrypoints.web.address=:80
       - --entrypoints.websecure.address=:443
-      - --entrypoints.websecure.http.tls=true
       - --entrypoints.ping.address=:8081
       - --ping.entryPoint=ping
       - --ping=true
@@ -259,6 +259,7 @@ services:
     labels:
       - traefik.enable=true
       - traefik.http.routers.netbird-dashboard.rule=Host(`${OPENDUT_DOMAIN_NETBIRD}`)
+      - traefik.http.routers.netbird-dashboard.tls=true
       - traefik.http.services.netbird-dashboard.loadbalancer.server.port=80
       - logging=alloy
       - logging_job=netbird-dashboard
@@ -275,9 +276,11 @@ services:
       - netbird-signal:/var/lib/netbird
     labels:
       - traefik.enable=true
+      - traefik.http.routers.netbird-wsproxy-signal.tls=true
       - traefik.http.routers.netbird-wsproxy-signal.rule=Host(`${OPENDUT_DOMAIN_SIGNAL}`) && PathPrefix(`/ws-proxy/signal`)
       - traefik.http.routers.netbird-wsproxy-signal.service=netbird-wsproxy-signal
       - traefik.http.services.netbird-wsproxy-signal.loadbalancer.server.port=80
+      - traefik.http.routers.netbird-signal.tls=true
       - traefik.http.routers.netbird-signal.rule=Host(`${OPENDUT_DOMAIN_SIGNAL}`) && PathPrefix(`/signalexchange.SignalExchange/`)
       - traefik.http.routers.netbird-signal.service=netbird-signal
       - traefik.http.services.netbird-signal.loadbalancer.server.port=10000
@@ -380,14 +383,17 @@ services:
     labels:
       - traefik.enable=true
       # Netbird API REST endpoint
+      - traefik.http.routers.netbird-api.tls=true
       - traefik.http.routers.netbird-api.rule=Host(`${OPENDUT_DOMAIN_NETBIRD_API}`) && PathPrefix(`/api`)
       - traefik.http.routers.netbird-api.service=netbird-api
       - traefik.http.services.netbird-api.loadbalancer.server.port=80
       # Websocket proxy
+      - traefik.http.routers.netbird-wsproxy-mgmt.tls=true
       - traefik.http.routers.netbird-wsproxy-mgmt.rule=Host(`${OPENDUT_DOMAIN_NETBIRD_API}`) && PathPrefix(`/ws-proxy/management`)
       - traefik.http.routers.netbird-wsproxy-mgmt.service=netbird-wsproxy-mgmt
       - traefik.http.services.netbird-wsproxy-mgmt.loadbalancer.server.port=80
       # Netbird API GRPC endpoint
+      - traefik.http.routers.netbird-management.tls=true
       - traefik.http.routers.netbird-management.rule=Host(`${OPENDUT_DOMAIN_NETBIRD_API}`) && PathPrefix(`/management.ManagementService/`)
       - traefik.http.routers.netbird-management.service=netbird-management
       - traefik.http.services.netbird-management.loadbalancer.server.port=80
@@ -397,35 +403,6 @@ services:
       - logging_job=netbird-management
     networks:
       - opendut_local
-
-  # Coturn
-  netbird-coturn:
-    container_name: opendut-netbird-coturn
-    # https://hub.docker.com/r/coturn/coturn/tags
-    # https://github.com/coturn/coturn/tree/master/docker/coturn#why-so-many-ports-opened
-    image: coturn/coturn:4.7.0
-    restart: unless-stopped
-    domainname: ${OPENDUT_DOMAIN_SUFFIX}
-    volumes:
-      - ./data/coturn/:/coturn/:ro
-    environment:
-      - TURN_REALM=${OPENDUT_DOMAIN_SUFFIX}
-      - TURN_DOMAIN=${OPENDUT_DOMAIN_SUFFIX}
-      - TURN_USER=self
-      - TURN_PASSWORD
-      - TURN_PORT=3478
-    network_mode: host  # only container using network host mode
-    labels:
-      - logging=alloy
-      - logging_job=netbird-coturn
-    entrypoint: ["/coturn/entrypoint.sh"]
-    # turnutils_uclient -T -p $TURN_PORT -u $TURN_USER -w $TURN_PASSWORD localhost
-    healthcheck:
-      <<: *common-healthcheck-params
-      test: ["CMD-SHELL", "turnutils_uclient -T -p $$TURN_PORT -u $$TURN_USER -w $$TURN_PASSWORD localhost"]
-    deploy:
-      mode: replicated
-      replicas: ${OPENDUT_COTURN_ENABLED:-1}
 
   # Relay
   netbird-relay:
@@ -443,6 +420,7 @@ services:
     #  test: wget --proxy off --no-verbose --tries=1 --spider http://localhost:33080/relay || exit 1
     labels:
       - traefik.enable=true
+      - traefik.http.routers.netbird-relay.tls=true
       - traefik.http.routers.netbird-relay.rule=Host(`$OPENDUT_DOMAIN_NETBIRD_RELAY`) # && PathPrefix(`/relay`)
       - traefik.http.services.netbird-relay.loadbalancer.server.port=33080
     networks:
@@ -576,6 +554,7 @@ services:
       replicas: ${OPENDUT_INSECURE_WEBDAV_ENABLED:-0}
     labels:
       - traefik.enable=true
+      - traefik.http.routers.nginx-webdav.tls=true
       - traefik.http.routers.nginx-webdav.rule=Host(`${OPENDUT_DOMAIN_NGINX_WEBDAV}`)
       - traefik.http.services.nginx-webdav.loadbalancer.server.port=80
       - logging=alloy
@@ -684,11 +663,13 @@ services:
     labels:
       - traefik.enable=true
       # OpenTelemetry GRPC endpoint
+      - traefik.http.routers.otel-collector-grpc.tls=true
       - traefik.http.routers.otel-collector-grpc.rule=Host(`${OPENDUT_DOMAIN_OPENTELEMETRY}`)
       - traefik.http.routers.otel-collector-grpc.service=otel-collector-grpc
       - traefik.http.services.otel-collector-grpc.loadbalancer.server.port=4317
       - traefik.http.services.otel-collector-grpc.loadbalancer.server.scheme=h2c
       # Health check endpoint
+      - traefik.http.routers.otel-collector-health.tls=true
       - traefik.http.routers.otel-collector-health.rule=Host(`${OPENDUT_DOMAIN_OPENTELEMETRY}`) && PathPrefix(`/health`)
       - traefik.http.routers.otel-collector-health.service=otel-collector-health
       - traefik.http.services.otel-collector-health.loadbalancer.server.port=13133
@@ -727,6 +708,7 @@ services:
       - grafana-storage:/var/lib/grafana
     labels:
       - traefik.enable=true
+      - traefik.http.routers.grafana.tls=true
       - traefik.http.routers.grafana.rule=Host(`${OPENDUT_DOMAIN_MONITORING}`)
       - traefik.http.services.grafana.loadbalancer.server.port=80
     networks:
