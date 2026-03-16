@@ -23,9 +23,10 @@ const CAN_EFF_FLAG: u32 = 0x8000_0000;
 #[repr(C)]
 struct SockAddrCan {
     can_family: u16,
+    _pad_align: u16,
     ifindex: i32,
     // rx_id / tx_id union – unused for raw CAN
-    _pad: [u8; 10],
+    _pad: [u8; 8],
 }
 
 /// Mirror of Linux `struct can_frame` (16 bytes).
@@ -81,8 +82,9 @@ impl CanSocket {
         // Bind to the CAN interface
         let addr = SockAddrCan {
             can_family: AF_CAN as u16,
+            _pad_align: 0,
             ifindex: ifindex as i32,
-            _pad: [0u8; 10],
+            _pad: [0u8; 8],
         };
         let ret = unsafe {
             libc::bind(
@@ -212,7 +214,18 @@ fn build_scheduled_frames(cluster: &CanCluster) -> Vec<ScheduledFrame> {
             }
         };
 
-        let frame = CanFrame::new(*can_id as u32, &data, extended);
+        let can_id_u32 = match u32::try_from(*can_id) {
+            Ok(id) => id,
+            Err(_) => {
+                warn!(
+                    can_id = *can_id,
+                    frame = %triggering.frame_name,
+                    "CAN ID out of u32 range, skipping frame"
+                );
+                continue;
+            }
+        };
+        let frame = CanFrame::new(can_id_u32, &data, extended);
 
         let label = format!(
             "{}(0x{:X})",
