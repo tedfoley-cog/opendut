@@ -307,6 +307,30 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c08606f8c3cbf4ce6ec8e28fb0014a2c086708fe954eaa885384a6165172e7e8"
 
 [[package]]
+name = "autosar-data"
+version = "0.21.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ea52a818637050da494f9971732e0ea622f7495c030975141724c7fd0ab8e4bc"
+dependencies = [
+ "autosar-data-specification",
+ "fxhash",
+ "indexmap 2.12.1",
+ "num-traits",
+ "parking_lot",
+ "smallvec",
+ "thiserror 2.0.17",
+]
+
+[[package]]
+name = "autosar-data-specification"
+version = "0.21.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "916b3ff46058692ab5eed284a2ad48316947bd2f983fd6c944b5f48db104e976"
+dependencies = [
+ "num-traits",
+]
+
+[[package]]
 name = "autotools"
 version = "0.2.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2159,6 +2183,15 @@ dependencies = [
  "pin-project-lite",
  "pin-utils",
  "slab",
+]
+
+[[package]]
+name = "fxhash"
+version = "0.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c31b6d751ae2c7f11320402d34e41349dd1016f8d5d45e48c4312bc8625af50c"
+dependencies = [
+ "byteorder",
 ]
 
 [[package]]
@@ -4362,6 +4395,19 @@ version = "0.9.0"
 dependencies = [
  "wasmtime",
  "wit-bindgen 0.47.0",
+]
+
+[[package]]
+name = "opendut-edgar-restbus-simulation"
+version = "0.9.0"
+dependencies = [
+ "autosar-data",
+ "googletest",
+ "libc",
+ "thiserror 2.0.17",
+ "tokio",
+ "tokio-util",
+ "tracing",
 ]
 
 [[package]]
@@ -7511,6 +7557,7 @@ dependencies = [
  "bytes",
  "futures-core",
  "futures-sink",
+ "futures-util",
  "pin-project-lite",
  "tokio",
 ]
