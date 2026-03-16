@@ -244,7 +244,7 @@ class CanBusForwardingTestCase(unittest.TestCase):
         # Start receiver first (candump with a timeout)
         recv_cid = self.container.create(
             image,
-            ["-c", "sh", "-c",
+            ["-c",
              f"timeout {can_timeout} candump {iface},0x{frame_id}:0x7FF -n 1"],
             entrypoint=["sh"],
             name=recv_name,
