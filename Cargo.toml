@@ -7,6 +7,7 @@ members = [
     "opendut-edgar/netbird-client-api",
     "opendut-edgar/opendut-edgar-kernel-modules",
     "opendut-edgar/plugin-api",
+    "opendut-edgar/restbus-simulation",
     "opendut-lea",
     "opendut-lea/opendut-lea-components",
     "opendut-model",
