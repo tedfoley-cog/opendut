@@ -1,5 +1,5 @@
 [workspace]
-members=["test_plugin1", "test_plugin2", "test_plugin3", "test_plugin4", "test_plugin5"]
+members=["test_plugin1", "test_plugin2", "test_plugin3", "test_plugin4", "test_plugin5", "custom_setup_plugin"]
 resolver = "2"
 
 [workspace.dependencies]

@@ -3,3 +3,4 @@ test_plugin2.wasm
 test_plugin3.wasm
 test_plugin4.wasm
 test_plugin5.wasm
+custom_setup_plugin.wasm
