@@ -55,15 +55,6 @@ BRIDGE_INTERFACE = parameters.TextParameter(
     description="Name of the openDuT EDGAR ethernet bridge interface.",
 )
 
-SCAN_TIMEOUT_SECONDS = parameters.NumberParameter(
-    "scan-timeout-seconds",
-    default=120,
-    min=10,
-    max=600,
-    display_name="Scan Timeout",
-    description="Maximum seconds to wait for the nmap scan container to finish.",
-)
-
 ENABLE_CAN_TESTS = parameters.BooleanParameter(
     "enable-can-tests",
     default=False,
@@ -98,37 +89,39 @@ class EcuConnectivityNmapScan(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         print("=== ECU Connectivity Nmap Scan: setUpClass ===")
-        cls.scan_container_name = "hil-nmap-ecu-scan"
 
     def setUp(self):
         self.target_ip = self.parameters.get(ECU_TARGET_IP)
         self.nmap_image = self.parameters.get(NMAP_IMAGE)
         self.timing = self.parameters.get(NMAP_TIMING)
         self.bridge = self.parameters.get(BRIDGE_INTERFACE)
+        self._container_name = None
         print(f"Target IP: {self.target_ip}")
         print(f"Nmap image: {self.nmap_image}")
         print(f"Timing: {self.timing}")
         print(f"Bridge: {self.bridge}")
 
     def tearDown(self):
-        # Clean up scan container if it exists
+        if self._container_name is None:
+            return
         try:
-            self.container.stop(self.scan_container_name)
+            self.container.stop(self._container_name)
         except Exception:
             pass
         try:
-            self.container.remove(self.scan_container_name)
+            self.container.remove(self._container_name)
         except Exception:
             pass
 
     def test_nmap_host_discovery(self):
         """Run nmap host discovery scan against the ECU target through the bridge."""
         print(f"Running nmap host discovery against {self.target_ip}")
+        self._container_name = "hil-nmap-host-discovery"
 
         container_id = self.container.create(
             self.nmap_image,
             ["-sn", self.timing, self.target_ip],
-            name=self.scan_container_name,
+            name=self._container_name,
             network="host",
         )
         self.container.start(container_id)
@@ -149,6 +142,7 @@ class EcuConnectivityNmapScan(unittest.TestCase):
     def test_nmap_port_scan(self):
         """Run a service/version detection scan on common automotive ports."""
         print(f"Running nmap port scan against {self.target_ip}")
+        self._container_name = "hil-nmap-port-scan"
 
         container_id = self.container.create(
             self.nmap_image,
@@ -158,7 +152,7 @@ class EcuConnectivityNmapScan(unittest.TestCase):
                 "-p", "3000,6801,13400,30490-30491",
                 self.target_ip,
             ],
-            name=self.scan_container_name,
+            name=self._container_name,
             network="host",
         )
         self.container.start(container_id)
@@ -178,11 +172,12 @@ class EcuConnectivityNmapScan(unittest.TestCase):
     def test_nmap_aggressive_scan(self):
         """Run an aggressive nmap scan (-A) for OS detection and traceroute."""
         print(f"Running nmap aggressive scan against {self.target_ip}")
+        self._container_name = "hil-nmap-aggressive-scan"
 
         container_id = self.container.create(
             self.nmap_image,
             ["-A", self.timing, self.target_ip],
-            name=self.scan_container_name,
+            name=self._container_name,
             network="host",
         )
         self.container.start(container_id)
@@ -215,25 +210,29 @@ class OpenDuTBridgeVerification(unittest.TestCase):
         self.target_ip = self.parameters.get(ECU_TARGET_IP)
         self.nmap_image = self.parameters.get(NMAP_IMAGE)
         self.timing = self.parameters.get(NMAP_TIMING)
+        self._container_name = None
 
     def tearDown(self):
+        if self._container_name is None:
+            return
         try:
-            self.container.stop("hil-bridge-verify")
+            self.container.stop(self._container_name)
         except Exception:
             pass
         try:
-            self.container.remove("hil-bridge-verify")
+            self.container.remove(self._container_name)
         except Exception:
             pass
 
     def test_bridge_ping_through_container(self):
         """Verify basic ICMP reachability of the ECU through the bridge via a container."""
         print(f"Pinging {self.target_ip} through bridge {self.bridge}")
+        self._container_name = "hil-bridge-ping"
 
         container_id = self.container.create(
             self.nmap_image,
             ["-sn", "-PE", self.timing, self.target_ip],
-            name="hil-bridge-verify",
+            name=self._container_name,
             network="host",
         )
         self.container.start(container_id)
@@ -260,10 +259,11 @@ class OpenDuTBridgeVerification(unittest.TestCase):
         subnet = f"{octets[0]}.{octets[1]}.{octets[2]}.0/24"
         print(f"Scanning subnet: {subnet}")
 
+        self._container_name = "hil-bridge-sweep"
         container_id = self.container.create(
             self.nmap_image,
             ["-sn", self.timing, subnet],
-            name="hil-bridge-verify",
+            name=self._container_name,
             network="host",
         )
         self.container.start(container_id)
