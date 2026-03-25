@@ -1,0 +1,24 @@
+[package]
+name = "opendut-edgar-restbus-simulation"
+description = "Restbus simulation engine for replaying CAN frame traffic from ARXML definitions."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[lib]
+path = "lib.rs"
+
+[dependencies]
+autosar-data = "0.21"
+libc = "0.2"
+thiserror = { workspace = true }
+tokio = { workspace = true, features = ["rt", "time", "sync", "macros"] }
+tokio-util = { version = "0.7", features = ["rt"] }
+tracing = { workspace = true }
+
+[dev-dependencies]
+googletest = { workspace = true }
+tokio = { workspace = true, features = ["rt-multi-thread", "time", "sync", "macros", "test-util"] }
+
+[lints]
+workspace = true
