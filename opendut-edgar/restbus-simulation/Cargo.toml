@@ -1,0 +1,18 @@
+[package]
+name = "opendut-edgar-restbus-simulation"
+description = "Restbus simulation engine for replaying ARXML-defined CAN frames on vcan interfaces."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+autosar-data = "0.21"
+libc = "0.2"
+tokio = { workspace = true, features = ["rt", "time", "sync", "macros"] }
+tracing = { workspace = true }
+
+[dev-dependencies]
+tokio = { workspace = true, features = ["full"] }
+
+[lints]
+workspace = true

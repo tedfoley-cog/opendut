@@ -463,11 +463,12 @@ impl ArxmlParser {
         let mut can_clusters: HashMap<String, CanCluster> = HashMap::new();
 
         // Iterate over Autosar elements and handle CanCluster elements
-        for element in model
+        for (_path, weak_element) in model
             .identifiable_elements()
-            .iter()
-            .filter_map(|path| model.get_element_by_path(&path))
         {
+            let Some(element) = weak_element.upgrade() else {
+                continue;
+            };
             match element.element_name() {
                 ElementName::CanCluster => {
                     let result: Result<CanCluster, String> = self.handle_can_cluster(&element);
