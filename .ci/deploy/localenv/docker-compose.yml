@@ -557,6 +557,12 @@ services:
       - traefik.http.routers.nginx-webdav.tls=true
       - traefik.http.routers.nginx-webdav.rule=Host(`${OPENDUT_DOMAIN_NGINX_WEBDAV}`)
       - traefik.http.services.nginx-webdav.loadbalancer.server.port=80
+      - traefik.http.middlewares.nginx-webdav-propfind-limit.buffering.maxRequestBodyBytes=16384
+      - traefik.http.routers.nginx-webdav-propfind.rule=Host(`${OPENDUT_DOMAIN_NGINX_WEBDAV}`) && Method(`PROPFIND`)
+      - traefik.http.routers.nginx-webdav-propfind.priority=100
+      - traefik.http.routers.nginx-webdav-propfind.tls=true
+      - traefik.http.routers.nginx-webdav-propfind.middlewares=nginx-webdav-propfind-limit
+      - traefik.http.routers.nginx-webdav-propfind.service=nginx-webdav
       - logging=alloy
       - logging_job=nginx-webdav
 
